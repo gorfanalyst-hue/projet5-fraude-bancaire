@@ -51,7 +51,7 @@ projet5-fraude-bancaire/
 1. Cloner le dépôt :
 
    ```bash
-   git clone https://github.com/NOM-ORGANISATION/projet5-fraude-bancaire.git
+   git clone https://github.com/gorfanalyst-hue/projet5-fraude-bancaire.git
    cd projet5-fraude-bancaire
    ```
 
