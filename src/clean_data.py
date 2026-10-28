@@ -44,3 +44,39 @@ def check_datetime_column(series: pd.Series, label: str):
     print(f"{label}: type={series.dtype}, "
           f"manquantes={series.isna().sum()}, "
           f"min={series.min()}, max={series.max()}")
+
+
+def build_mcc_table(df_mcc: pd.DataFrame) -> pd.DataFrame:
+    """
+    Nettoie la table des codes MCC : espaces retirés, tri par code,
+    unicité des codes vérifiée.
+    """
+    table = df_mcc.copy()
+    table["description"] = table["description"].str.strip()
+    table = table.sort_values("mcc_code").reset_index(drop=True)
+    n_dup = table["mcc_code"].duplicated().sum()
+    if n_dup:
+        raise ValueError(f"{n_dup} code(s) MCC en double")
+    return table
+
+
+def check_mcc_join(df_transaction: pd.DataFrame, df_mcc: pd.DataFrame) -> bool:
+    """
+    Joint transactions et catégories MCC, puis vérifie qu'aucune ligne
+    n'est perdue ou dupliquée et qu'aucune transaction n'est sans catégorie.
+    """
+    n_before = len(df_transaction)
+    joined = df_transaction[["id", "mcc"]].merge(
+        df_mcc, left_on="mcc", right_on="mcc_code",
+        how="left", validate="many_to_one"
+    )
+    n_after = len(joined)
+    orphan_mask = joined["description"].isna()
+    n_orphan = orphan_mask.sum()
+
+    print(f"Lignes avant : {n_before:,} | après : {n_after:,}")
+    print(f"Transactions sans catégorie : {n_orphan:,}")
+    if n_orphan:
+        print("Codes MCC sans correspondance :",
+              sorted(joined.loc[orphan_mask, "mcc"].unique()))
+    return n_before == n_after and n_orphan == 0
