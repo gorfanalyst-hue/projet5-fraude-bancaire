@@ -23,3 +23,24 @@ def report_conversion_issues(original: pd.Series, converted: pd.Series, label: s
     print(f"{label}: {n_failed} valeur(s) non convertie(s)")
     if n_failed > 0:
         print(original[failed_mask].unique()[:10])
+
+# Conversion des dates
+def convert_month_year_column(series: pd.Series, end_of_month: bool = False) -> pd.Series:
+    """
+    Convertit une colonne texte 'mm/aaaa' en datetime.
+    Par défaut : 1er jour du mois. Avec end_of_month=True : dernier jour du mois.
+    Retourne NaT pour toute valeur non convertible.
+    """
+    dates = pd.to_datetime(series, format="%m/%Y", errors="coerce")
+    if end_of_month:
+        dates = dates + pd.offsets.MonthEnd(0)
+    return dates
+
+
+def check_datetime_column(series: pd.Series, label: str):
+    """
+    Affiche le type, le nombre de dates manquantes et la plage de dates.
+    """
+    print(f"{label}: type={series.dtype}, "
+          f"manquantes={series.isna().sum()}, "
+          f"min={series.min()}, max={series.max()}")
