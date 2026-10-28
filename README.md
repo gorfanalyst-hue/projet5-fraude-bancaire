@@ -100,6 +100,9 @@ Règles à respecter :
 |---|---|
 | `docs/01_chargement_donnees.md` | Fonctions de chargement communes (P3-01) |
 | `docs/02_conversion_montants.md` | Conversion des montants en nombres (P3-02) |
+| `docs/03_conversion_dates.md` | Conversion des dates `mm/aaaa` en dates (P3-03) |
+| `docs/04_table_mcc.md` | Table des catégories MCC et contrôle de jointure (P3-04) |
+| `docs/05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
 
 ## Livrables
 

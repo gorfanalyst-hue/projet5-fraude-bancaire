@@ -80,3 +80,37 @@ def check_mcc_join(df_transaction: pd.DataFrame, df_mcc: pd.DataFrame) -> bool:
         print("Codes MCC sans correspondance :",
               sorted(joined.loc[orphan_mask, "mcc"].unique()))
     return n_before == n_after and n_orphan == 0
+
+
+from src.mcc_families import MCC_TO_FAMILLE, MCC_DESCRIPTIONS_FR
+
+def add_mcc_families(df_mcc: pd.DataFrame) -> pd.DataFrame:
+    """Ajoute la famille et la description française à la table MCC."""
+    table = df_mcc.copy()
+    table["famille"] = table["mcc_code"].map(MCC_TO_FAMILLE)
+    table["description_fr"] = table["mcc_code"].map(MCC_DESCRIPTIONS_FR)
+    return table
+
+
+def check_mcc_families(df_mcc: pd.DataFrame, df_transaction: pd.DataFrame) -> bool:
+    """
+    Vérifie que chaque code a une famille et une description française,
+    puis résume les familles (codes et transactions).
+    """
+    missing_family = df_mcc.loc[df_mcc["famille"].isna(), "mcc_code"].tolist()
+    missing_fr = df_mcc.loc[df_mcc["description_fr"].isna(), "mcc_code"].tolist()
+    extra = sorted(set(MCC_TO_FAMILLE) - set(df_mcc["mcc_code"]))
+    print(f"Codes sans famille : {missing_family}")
+    print(f"Codes sans description française : {missing_fr}")
+    print(f"Codes du dictionnaire absents de la table : {extra}")
+
+    n_tx = df_transaction["mcc"].value_counts().rename("n_transactions")
+    resume = (
+        df_mcc.merge(n_tx, left_on="mcc_code", right_index=True, how="left")
+        .groupby("famille")
+        .agg(n_codes=("mcc_code", "count"), n_transactions=("n_transactions", "sum"))
+        .sort_values("n_transactions", ascending=False)
+    )
+    resume["part_%"] = (100 * resume["n_transactions"] / resume["n_transactions"].sum()).round(1)
+    print(resume)
+    return not (missing_family or missing_fr or extra)
