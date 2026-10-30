@@ -1,14 +1,14 @@
-# P3-02 — Conversion des montants en nombres
+# P3-02 : Conversion des montants en nombres
 
 ## Pourquoi cette étape ?
 
 Plusieurs colonnes financières sont lues comme du **texte** (type `object`) parce qu'elles contiennent le symbole `$` (et parfois des virgules) :
 
-| Fichier | Colonnes concernées |
-|---|---|
-| `transactions_data.csv` | `amount` |
-| `cards_data.csv` | `credit_limit` |
-| `users_data.csv` | `per_capita_income`, `yearly_income`, `total_debt` |
+| Fichier                 | Colonnes concernées                                |
+| ----------------------- | -------------------------------------------------- |
+| `transactions_data.csv` | `amount`                                           |
+| `cards_data.csv`        | `credit_limit`                                     |
+| `users_data.csv`        | `per_capita_income`, `yearly_income`, `total_debt` |
 
 Tant qu'elles sont en texte, impossible de calculer une moyenne, une médiane, un écart au montant habituel (P4-04) ou de comparer deux montants. Il faut les convertir en nombres décimaux (`float`).
 
@@ -35,25 +35,25 @@ def convert_currency_column(series: pd.Series) -> pd.Series:
 
 ### Explication ligne par ligne
 
-| Syntaxe | Rôle |
-|---|---|
-| `series.astype(str)` | Force tout en texte pour que les opérations `.str` fonctionnent sur toutes les valeurs. Les valeurs manquantes deviennent le texte `"nan"`, qui sera reconverti en `NaN` à la dernière étape. |
-| `.str.replace("$", "", regex=False)` | Supprime le symbole `$`. Le paramètre `regex=False` est important : en mode regex, `$` signifie « fin de chaîne » et ne retirerait rien. |
-| `.str.replace(",", "", regex=False)` | Supprime les séparateurs de milliers (`1,234.56` devient `1234.56`). |
-| `.str.strip()` | Retire les espaces au début et à la fin. |
-| `pd.to_numeric(..., errors="coerce")` | Convertit en nombre. Toute valeur impossible à convertir devient `NaN` au lieu de provoquer une erreur. |
+| Syntaxe                               | Rôle                                                                                                                                                                                          |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `series.astype(str)`                  | Force tout en texte pour que les opérations `.str` fonctionnent sur toutes les valeurs. Les valeurs manquantes deviennent le texte `"nan"`, qui sera reconverti en `NaN` à la dernière étape. |
+| `.str.replace("$", "", regex=False)`  | Supprime le symbole `$`. Le paramètre `regex=False` est important : en mode regex, `$` signifie « fin de chaîne » et ne retirerait rien.                                                      |
+| `.str.replace(",", "", regex=False)`  | Supprime les séparateurs de milliers (`1,234.56` devient `1234.56`).                                                                                                                          |
+| `.str.strip()`                        | Retire les espaces au début et à la fin.                                                                                                                                                      |
+| `pd.to_numeric(..., errors="coerce")` | Convertit en nombre. Toute valeur impossible à convertir devient `NaN` au lieu de provoquer une erreur.                                                                                       |
 
 Les enchaînements `.str.replace(...).str.replace(...)` se lisent de haut en bas : chaque opération s'applique au résultat de la précédente.
 
 ### Exemples
 
-| Texte d'origine | Résultat |
-|---|---|
-| `$14.57` | `14.57` |
-| `$-77.00` | `-77.0` |
-| `$24295` | `24295.0` |
-| `$1,234.56` | `1234.56` |
-| `abc` | `NaN` |
+| Texte d'origine | Résultat  |
+| --------------- | --------- |
+| `$14.57`        | `14.57`   |
+| `$-77.00`       | `-77.0`   |
+| `$24295`        | `24295.0` |
+| `$1,234.56`     | `1234.56` |
+| `abc`           | `NaN`     |
 
 ## Fonction 2 : `report_conversion_issues`
 
@@ -70,11 +70,11 @@ def report_conversion_issues(original: pd.Series, converted: pd.Series, label: s
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
+| Syntaxe                               | Rôle                                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `converted.isna() & original.notna()` | Repère les lignes où la valeur **était présente** avant la conversion mais **est devenue vide** après. Ce sont les vraies erreurs de conversion. Une valeur déjà manquante au départ n'est pas comptée. |
-| `failed_mask.sum()` | Compte les lignes en échec (`True` vaut 1, `False` vaut 0). |
-| `original[failed_mask].unique()[:10]` | Affiche jusqu'à 10 valeurs distinctes qui ont posé problème, pour pouvoir les documenter. |
+| `failed_mask.sum()`                   | Compte les lignes en échec (`True` vaut 1, `False` vaut 0).                                                                                                                                             |
+| `original[failed_mask].unique()[:10]` | Affiche jusqu'à 10 valeurs distinctes qui ont posé problème, pour pouvoir les documenter.                                                                                                               |
 
 ## Comment l'utiliser dans le notebook
 

@@ -1,4 +1,21 @@
+"""
+Fonctions de nettoyage et de transformation (phase 3).
+
+Chaque section correspond à un ticket Jira. Les fonctions de contrôle
+(check_...) vérifient le critère de fin du ticket.
+"""
+
+from pathlib import Path
+
 import pandas as pd
+
+from src.diagnostic import REPEAT_KEYS
+from src.mcc_families import MCC_TO_FAMILLE, MCC_DESCRIPTIONS_FR
+
+# =============================================================================
+# P3-02 : Conversion des montants
+# =============================================================================
+
 
 def convert_currency_column(series: pd.Series) -> pd.Series:
     """
@@ -24,8 +41,15 @@ def report_conversion_issues(original: pd.Series, converted: pd.Series, label: s
     if n_failed > 0:
         print(original[failed_mask].unique()[:10])
 
-# Conversion des dates
-def convert_month_year_column(series: pd.Series, end_of_month: bool = False) -> pd.Series:
+
+# =============================================================================
+# P3-03 : Conversion des dates
+# =============================================================================
+
+
+def convert_month_year_column(
+    series: pd.Series, end_of_month: bool = False
+) -> pd.Series:
     """
     Convertit une colonne texte 'mm/aaaa' en datetime.
     Par défaut : 1er jour du mois. Avec end_of_month=True : dernier jour du mois.
@@ -41,9 +65,16 @@ def check_datetime_column(series: pd.Series, label: str):
     """
     Affiche le type, le nombre de dates manquantes et la plage de dates.
     """
-    print(f"{label}: type={series.dtype}, "
-          f"manquantes={series.isna().sum()}, "
-          f"min={series.min()}, max={series.max()}")
+    print(
+        f"{label}: type={series.dtype}, "
+        f"manquantes={series.isna().sum()}, "
+        f"min={series.min()}, max={series.max()}"
+    )
+
+
+# =============================================================================
+# P3-04 : Table des catégories MCC
+# =============================================================================
 
 
 def build_mcc_table(df_mcc: pd.DataFrame) -> pd.DataFrame:
@@ -67,8 +98,7 @@ def check_mcc_join(df_transaction: pd.DataFrame, df_mcc: pd.DataFrame) -> bool:
     """
     n_before = len(df_transaction)
     joined = df_transaction[["id", "mcc"]].merge(
-        df_mcc, left_on="mcc", right_on="mcc_code",
-        how="left", validate="many_to_one"
+        df_mcc, left_on="mcc", right_on="mcc_code", how="left", validate="many_to_one"
     )
     n_after = len(joined)
     orphan_mask = joined["description"].isna()
@@ -77,12 +107,17 @@ def check_mcc_join(df_transaction: pd.DataFrame, df_mcc: pd.DataFrame) -> bool:
     print(f"Lignes avant : {n_before:,} | après : {n_after:,}")
     print(f"Transactions sans catégorie : {n_orphan:,}")
     if n_orphan:
-        print("Codes MCC sans correspondance :",
-              sorted(joined.loc[orphan_mask, "mcc"].unique()))
+        print(
+            "Codes MCC sans correspondance :",
+            sorted(joined.loc[orphan_mask, "mcc"].unique()),
+        )
     return n_before == n_after and n_orphan == 0
 
 
-from src.mcc_families import MCC_TO_FAMILLE, MCC_DESCRIPTIONS_FR
+# =============================================================================
+# P3-05 : Familles de codes MCC
+# =============================================================================
+
 
 def add_mcc_families(df_mcc: pd.DataFrame) -> pd.DataFrame:
     """Ajoute la famille et la description française à la table MCC."""
@@ -111,14 +146,17 @@ def check_mcc_families(df_mcc: pd.DataFrame, df_transaction: pd.DataFrame) -> bo
         .agg(n_codes=("mcc_code", "count"), n_transactions=("n_transactions", "sum"))
         .sort_values("n_transactions", ascending=False)
     )
-    resume["part_%"] = (100 * resume["n_transactions"] / resume["n_transactions"].sum()).round(1)
+    resume["part_%"] = (
+        100 * resume["n_transactions"] / resume["n_transactions"].sum()
+    ).round(1)
     print(resume)
     return not (missing_family or missing_fr or extra)
+
 
 # =============================================================================
 # P3-06 : Transformation de la colonne errors
 # =============================================================================
- 
+
 # Liste standard des erreurs simples et sous-ensemble des échecs d'authentification (cf. P4-06)
 ALL_ERROR_TYPES = [
     "Bad PIN",
@@ -129,7 +167,7 @@ ALL_ERROR_TYPES = [
     "Insufficient Balance",
     "Technical Glitch",
 ]
- 
+
 AUTH_ERROR_TYPES = [
     "Bad PIN",
     "Bad CVV",
@@ -137,13 +175,13 @@ AUTH_ERROR_TYPES = [
     "Bad Expiration",
     "Bad Zipcode",
 ]
- 
- 
+
+
 def _slugify_error_name(err_name: str) -> str:
     """Transforme 'Bad Card Number' en 'err_bad_card_number'."""
     return "err_" + err_name.lower().replace(" ", "_")
- 
- 
+
+
 def transform_errors_column(
     df: pd.DataFrame, error_col: str = "errors"
 ) -> pd.DataFrame:
@@ -154,10 +192,10 @@ def transform_errors_column(
     - Un indicateur 'has_auth_error' (échec d'authentification : PIN, CVV, numéro, expiration, zip)
     """
     s_err = df[error_col].astype("string").fillna("")
- 
+
     # 1. Indicateur "au moins une erreur"
     df["has_error"] = (s_err != "").astype("int8")
- 
+
     # 2. Une colonne oui/non (int8) par type d'erreur
     # Astuce mémoire/vitesse : calculer sur les modalités uniques puis mapper
     unique_vals = s_err.unique()
@@ -169,14 +207,14 @@ def transform_errors_column(
             for val in unique_vals
         }
         df[col_name] = s_err.map(mapping).astype("int8")
- 
+
     # 3. Indicateur "échec d'authentification"
     auth_cols = [_slugify_error_name(e) for e in AUTH_ERROR_TYPES]
     df["has_auth_error"] = (df[auth_cols].sum(axis=1) > 0).astype("int8")
- 
+
     return df
- 
- 
+
+
 def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
     """
     Vérifie le critère de fin de P3-06 :
@@ -184,15 +222,10 @@ def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
     """
     print("=== Contrôle P3-06 : Transformation de la colonne 'errors' ===")
     s_err = df[error_col].dropna().astype(str)
- 
+
     # Comptage de référence façon P2-13 (explosion des chaînes séparées par virgule)
-    ref_counts = (
-        s_err.str.split(",")
-        .explode()
-        .str.strip()
-        .value_counts()
-    )
- 
+    ref_counts = s_err.str.split(",").explode().str.strip().value_counts()
+
     all_match = True
     for err_type in ALL_ERROR_TYPES:
         col_name = _slugify_error_name(err_type)
@@ -201,37 +234,90 @@ def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
         match = col_total == ref_total
         all_match = all_match and match
         statut = "OK" if match else "ÉCART !"
-        print(f"  - {err_type:<22} ({col_name:<25}) : {col_total:>8} | Réf P2-13 : {ref_total:>8} [{statut}]")
+        print(
+            f"  - {err_type:<22} ({col_name:<25}) : {col_total:>8} | Réf P2-13 : {ref_total:>8} [{statut}]"
+        )
 
     inconnus = sorted(set(ref_counts.index) - set(ALL_ERROR_TYPES))
     print(f"  - Types d'erreur absents de ALL_ERROR_TYPES : {inconnus}")
     all_match = all_match and not inconnus
 
-    print(f"  - Transactions avec >= 1 erreur (has_error)      : {int(df['has_error'].sum()):>8}")
-    print(f"  - Transactions avec échec auth (has_auth_error)  : {int(df['has_auth_error'].sum()):>8}")
+    print(
+        f"  - Transactions avec >= 1 erreur (has_error)      : {int(df['has_error'].sum()):>8}"
+    )
+    print(
+        f"  - Transactions avec échec auth (has_auth_error)  : {int(df['has_auth_error'].sum()):>8}"
+    )
     print(f"Critère de fin P3-06 validé : {all_match}\n")
- 
-    print(f"  - Transactions avec >= 1 erreur (has_error)      : {int(df['has_error'].sum()):>8}")
-    print(f"  - Transactions avec échec auth (has_auth_error)  : {int(df['has_auth_error'].sum()):>8}")
-    print(f"Critère de fin P3-06 validé : {all_match}\n")
- 
- 
+
+
 # =============================================================================
 # P3-07 : Structuration du lieu des transactions
 # =============================================================================
- 
+
 # Codes officiels à 2 lettres des 50 États américains + DC + territoires US
 US_STATES_AND_TERRITORIES = {
-    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
-    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
-    "DC", "PR", "GU", "VI", "AS", "MP", "AA"
+    "AL",
+    "AK",
+    "AZ",
+    "AR",
+    "CA",
+    "CO",
+    "CT",
+    "DE",
+    "FL",
+    "GA",
+    "HI",
+    "ID",
+    "IL",
+    "IN",
+    "IA",
+    "KS",
+    "KY",
+    "LA",
+    "ME",
+    "MD",
+    "MA",
+    "MI",
+    "MN",
+    "MS",
+    "MO",
+    "MT",
+    "NE",
+    "NV",
+    "NH",
+    "NJ",
+    "NM",
+    "NY",
+    "NC",
+    "ND",
+    "OH",
+    "OK",
+    "OR",
+    "PA",
+    "RI",
+    "SC",
+    "SD",
+    "TN",
+    "TX",
+    "UT",
+    "VT",
+    "VA",
+    "WA",
+    "WV",
+    "WI",
+    "WY",
+    "DC",
+    "PR",
+    "GU",
+    "VI",
+    "AS",
+    "MP",
+    "AA",
 }
- 
- 
-def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
+
+
+def structure_transaction_location(df: pd.DataFrame) -> pd.DataFrame:
     """
     P3-07 : Structure les colonnes géographiques des transactions :
     - Crée l'indicateur 'is_online' (int8 : 0/1)
@@ -242,39 +328,47 @@ def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
     city_str = df["merchant_city"].astype("string").str.strip().fillna("UNKNOWN")
     state_str = df["merchant_state"].astype("string").str.strip()
     chip_str = df["use_chip"].astype("string").str.strip().fillna("")
- 
+
     # 1. Indicateur "en ligne" (concordance entre merchant_city == ONLINE et use_chip)
-    is_online_mask = (city_str.str.upper() == "ONLINE") | (chip_str == "Online Transaction")
+    is_online_mask = (city_str.str.upper() == "ONLINE") | (
+        chip_str == "Online Transaction"
+    )
     df["is_online"] = is_online_mask.astype("int8")
 
-        # Désaccord ville ONLINE / canal (P2-07) : conservé et marqué, pas supprimé
-    df["online_channel_mismatch"] = (is_online_mask & (chip_str != "Online Transaction")).astype("int8")
- 
+    # Désaccord ville ONLINE / canal (P2-07) : conservé et marqué, pas supprimé
+    df["online_channel_mismatch"] = (
+        is_online_mask & (chip_str != "Online Transaction")
+    ).astype("int8")
+
     # 2. Identification des États américains vs Pays étrangers
     is_us_state_mask = (~is_online_mask) & state_str.isin(US_STATES_AND_TERRITORIES)
-    is_foreign_mask = (~is_online_mask) & state_str.notna() & (~state_str.isin(US_STATES_AND_TERRITORIES))
- 
+    is_foreign_mask = (
+        (~is_online_mask)
+        & state_str.notna()
+        & (~state_str.isin(US_STATES_AND_TERRITORIES))
+    )
+
     # 3. Construction de la colonne 'merchant_country'
     country = pd.Series("UNKNOWN", index=df.index, dtype="string")
     country = country.mask(is_online_mask, "ONLINE")
     country = country.mask(is_us_state_mask, "USA")
     country = country.mask(is_foreign_mask, state_str)
     df["merchant_country"] = country.astype("category")
- 
+
     # 4. Construction de la colonne 'merchant_state_clean' (sans aucun NaN)
     state_clean = pd.Series("UNKNOWN", index=df.index, dtype="string")
     state_clean = state_clean.mask(is_online_mask, "ONLINE")
     state_clean = state_clean.mask(is_us_state_mask, state_str)
     state_clean = state_clean.mask(is_foreign_mask, "FOREIGN_NO_STATE")
     df["merchant_state_clean"] = state_clean.astype("category")
- 
+
     # 5. Nettoyage explicite de 'merchant_city'
     city_clean = city_str.mask(is_online_mask, "ONLINE")
     df["merchant_city"] = city_clean.astype("category")
- 
+
     # 6. Indicateur "à l'étranger" (transactions physiques hors USA)
     df["is_foreign"] = is_foreign_mask.astype("int8")
- 
+
     # 7. Traitement explicite du code postal (zip) s'il est présent
     if "zip" in df.columns:
         zip_str = (
@@ -288,28 +382,229 @@ def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
         zip_clean = zip_clean.mask(is_online_mask, "ONLINE")
         zip_clean = zip_clean.mask(is_foreign_mask & df["zip"].isna(), "FOREIGN_NO_ZIP")
         df["zip_clean"] = zip_clean.astype("category")
- 
+
     return df
- 
- 
-def check_location_structuration(df: pd.DataFrame):
+
+
+def check_transaction_location(df: pd.DataFrame):
     """
     Vérifie le critère de fin de P3-07 :
     Plus aucun manquant inexpliqué dans les colonnes de lieu.
     """
     print("=== Contrôle P3-07 : Structuration du lieu des transactions ===")
-    loc_cols = ["merchant_city", "merchant_state_clean", "merchant_country", "is_online", "is_foreign"]
+    loc_cols = [
+        "merchant_city",
+        "merchant_state_clean",
+        "merchant_country",
+        "is_online",
+        "is_foreign",
+    ]
     if "zip_clean" in df.columns:
         loc_cols.append("zip_clean")
 
     for col in loc_cols:
         n_na = int(df[col].isna().sum())
-        n_unk = 0 if col in ("is_online", "is_foreign") else int((df[col] == "UNKNOWN").sum())
+        n_unk = (
+            0
+            if col in ("is_online", "is_foreign")
+            else int((df[col] == "UNKNOWN").sum())
+        )
         print(f"  - {col:<22} : NaN = {n_na:>6} | 'UNKNOWN' (inexpliqués) = {n_unk:>6}")
 
     print("\nRépartition par type de localisation :")
     print(f"  - En ligne (is_online=1)      : {int(df['is_online'].sum()):>10}")
     print(f"  - À l'étranger (is_foreign=1) : {int(df['is_foreign'].sum()):>10}")
-    print(f"  - Aux USA (physique)          : {int((df['merchant_country'] == 'USA').sum()):>10}\n")
-    print(f"  - Désaccord ville/canal (online_channel_mismatch=1) : {int(df['online_channel_mismatch'].sum()):>10}")
- 
+    print(
+        f"  - Aux USA (physique)          : {int((df['merchant_country'] == 'USA').sum()):>10}\n"
+    )
+    print(
+        f"  - Désaccord ville/canal (online_channel_mismatch=1) : {int(df['online_channel_mismatch'].sum()):>10}"
+    )
+
+
+# =============================================================================
+# P3-08 : Règles pour les valeurs suspectes
+# =============================================================================
+# Règles choisies dans le rapport de diagnostic (P2-16) : aucune ligne n'est
+# supprimée et aucune valeur n'est modifiée. Chaque cas est signalé par un
+# indicateur 0/1, que les analyses pourront utiliser comme filtre.
+
+# REPEAT_KEYS (même carte, même minute, même montant, même commerçant)
+# est défini dans src/diagnostic.py (P2-14) et importé en haut du fichier.
+
+
+def flag_suspicious_transactions(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    P3-08 : ajoute trois indicateurs (int8 : 0/1) aux transactions :
+    - is_negative_amount : montant négatif ;
+    - is_zero_amount : montant nul ;
+    - is_repeated : seconde ligne d'un groupe répété (même carte, même minute,
+      même montant, même commerçant) dont aucune ligne n'a d'erreur.
+    Le montant doit déjà être numérique (P3-02).
+    """
+    df["is_negative_amount"] = (df["amount"] < 0).astype("int8")
+    df["is_zero_amount"] = (df["amount"] == 0).astype("int8")
+
+    # Seules les lignes des groupes répétés sont examinées
+    in_group = df.duplicated(subset=REPEAT_KEYS, keep=False)
+    group = df.loc[in_group, REPEAT_KEYS + ["errors"]]
+    group_has_error = (
+        group["errors"]
+        .notna()
+        .groupby([group[k] for k in REPEAT_KEYS])
+        .transform("any")
+    )
+    not_first = group.duplicated(subset=REPEAT_KEYS, keep="first")
+    flagged = not_first & ~group_has_error
+
+    is_repeated = pd.Series(0, index=df.index, dtype="int8")
+    is_repeated[flagged[flagged].index] = 1
+    df["is_repeated"] = is_repeated
+    return df
+
+
+def flag_suspicious_users(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    P3-08 : suspicious_income = 1 si le revenu annuel est inférieur à 1 000
+    ou si le revenu par habitant est nul. Les revenus doivent être numériques.
+    """
+    df["suspicious_income"] = (
+        (df["yearly_income"] < 1000) | (df["per_capita_income"] == 0)
+    ).astype("int8")
+    return df
+
+
+def flag_suspicious_cards(df: pd.DataFrame) -> pd.DataFrame:
+    """P3-08 : zero_credit_limit = 1 si la limite de crédit est nulle."""
+    df["zero_credit_limit"] = (df["credit_limit"] == 0).astype("int8")
+    return df
+
+
+def check_suspicious_flags(df_transaction, df_users, df_card) -> pd.DataFrame:
+    """
+    Critère de fin de P3-08 : chaque règle appliquée et tracée.
+    Retourne le nombre de lignes signalées par chaque indicateur.
+    """
+    rules = [
+        ("transactions", "is_negative_amount", "montant négatif", df_transaction),
+        ("transactions", "is_zero_amount", "montant nul", df_transaction),
+        (
+            "transactions",
+            "is_repeated",
+            "seconde ligne d'un groupe répété sans erreur",
+            df_transaction,
+        ),
+        (
+            "users",
+            "suspicious_income",
+            "revenu annuel < 1 000 ou revenu par habitant nul",
+            df_users,
+        ),
+        ("cards", "zero_credit_limit", "limite de crédit nulle", df_card),
+    ]
+    rows = [
+        {
+            "table": t,
+            "indicateur": col,
+            "règle": rule,
+            "lignes": len(df),
+            "lignes signalées": int(df[col].sum()),
+        }
+        for t, col, rule, df in rules
+    ]
+    return pd.DataFrame(rows)
+
+
+# =============================================================================
+# P3-09 : Colonnes sensibles et inutiles
+# =============================================================================
+
+# Colonnes sensibles et colonne à valeur unique (confirmée en P2-11)
+COLUMNS_TO_DROP = {
+    "cards": ["card_number", "cvv", "card_on_dark_web"],
+    "users": ["address"],
+}
+
+
+def drop_columns(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+    """P3-09 : retire les colonnes indiquées. Une colonne déjà absente est ignorée."""
+    return df.drop(columns=[col for col in columns if col in df.columns])
+
+
+def check_columns_removed(
+    tables: dict, removed: dict = COLUMNS_TO_DROP
+) -> pd.DataFrame:
+    """
+    Critère de fin de P3-09 : les colonnes retirées sont absentes des tables.
+    tables : dictionnaire {nom : DataFrame}.
+    """
+    rows = []
+    for name, columns in removed.items():
+        for col in columns:
+            rows.append(
+                {
+                    "table": name,
+                    "colonne": col,
+                    "encore présente": col in tables[name].columns,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+# =============================================================================
+# P3-10 : Enregistrement des tables nettoyées
+# =============================================================================
+
+CLEAN_DIR = Path(__file__).resolve().parent.parent / "data" / "clean"
+
+
+def save_clean_tables(tables: dict, folder: Path = CLEAN_DIR) -> pd.DataFrame:
+    """
+    P3-10 : enregistre chaque table au format Parquet dans data/clean/.
+    Retourne, pour chaque table, le nombre de lignes, de colonnes et la taille du fichier.
+    """
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for name, df in tables.items():
+        path = folder / f"{name}.parquet"
+        df.to_parquet(path, index=False)
+        rows.append(
+            {
+                "table": name,
+                "lignes": len(df),
+                "colonnes": df.shape[1],
+                "taille du fichier (Mo)": round(path.stat().st_size / 1e6, 1),
+            }
+        )
+    return pd.DataFrame(rows).set_index("table")
+
+
+# =============================================================================
+# P3-12 : Résumé des transformations pour le journal
+# =============================================================================
+
+
+def transformation_summary(before: dict, after: dict) -> pd.DataFrame:
+    """
+    Compare chaque table avant et après le nettoyage : lignes, colonnes,
+    colonnes ajoutées et colonnes retirées.
+    before : {nom : (nombre de lignes, liste des colonnes)} mesuré au chargement
+    after : {nom : DataFrame nettoyé}
+    """
+    rows = []
+    for name, (n_rows, cols_before) in before.items():
+        df = after[name]
+        added = [c for c in df.columns if c not in cols_before]
+        removed = [c for c in cols_before if c not in df.columns]
+        rows.append(
+            {
+                "table": name,
+                "lignes avant": n_rows,
+                "lignes après": len(df),
+                "colonnes avant": len(cols_before),
+                "colonnes après": df.shape[1],
+                "colonnes ajoutées": ", ".join(added) or "aucune",
+                "colonnes retirées": ", ".join(removed) or "aucune",
+            }
+        )
+    return pd.DataFrame(rows).set_index("table")

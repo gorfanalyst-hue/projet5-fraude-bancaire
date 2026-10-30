@@ -14,8 +14,7 @@ data/
 *.json
 *.parquet
 
-# Éditeur
+# Éditeur (réglages personnels de chacun)
 .idea/
+.vscode/
 .DS_Store
-
-!.vscode/settings.json

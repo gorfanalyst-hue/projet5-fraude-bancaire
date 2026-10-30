@@ -4,10 +4,10 @@
 
 Deux colonnes de la table des cartes contiennent des dates écrites en texte au format `mm/aaaa` (par exemple `12/2022`) :
 
-| Fichier | Colonne | Contenu |
-|---|---|---|
-| `cards_data.csv` | `expires` | Date d'expiration de la carte |
-| `cards_data.csv` | `acct_open_date` | Date d'ouverture du compte |
+| Fichier          | Colonne          | Contenu                       |
+| ---------------- | ---------------- | ----------------------------- |
+| `cards_data.csv` | `expires`        | Date d'expiration de la carte |
+| `cards_data.csv` | `acct_open_date` | Date d'ouverture du compte    |
 
 Tant qu'elles sont en texte, on ne peut ni les comparer, ni calculer une durée (ancienneté du compte, temps restant avant l'expiration), ni les croiser avec la date des transactions (P4-02, P4-03).
 
@@ -22,10 +22,10 @@ Le format `mm/aaaa` ne contient pas de jour. Pandas choisit le 1er du mois par d
 
 Choix retenu :
 
-| Colonne | Jour retenu |
-|---|---|
-| `acct_open_date` | 1er du mois |
-| `expires` | Dernier jour du mois |
+| Colonne          | Jour retenu          |
+| ---------------- | -------------------- |
+| `acct_open_date` | 1er du mois          |
+| `expires`        | Dernier jour du mois |
 
 Ce choix doit figurer dans le journal des transformations (P3-12).
 
@@ -45,22 +45,22 @@ def convert_month_year_column(series: pd.Series, end_of_month: bool = False) -> 
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
-| `pd.to_datetime(series, ...)` | Convertit une colonne de texte en dates. |
-| `format="%m/%Y"` | Décrit le format attendu : `%m` pour le mois sur deux chiffres, `%Y` pour l'année sur quatre chiffres. Préciser le format évite les erreurs d'interprétation et accélère la conversion. |
-| `errors="coerce"` | Toute valeur impossible à convertir devient `NaT` (l'équivalent de `NaN` pour les dates) au lieu de provoquer une erreur. |
-| `end_of_month=False` | Paramètre qui choisit le jour retenu. Par défaut, c'est le 1er du mois. |
-| `pd.offsets.MonthEnd(0)` | Avance la date jusqu'à la fin de son mois. Le `0` signifie « reste dans le mois courant » : sans lui, la date sauterait au mois suivant. |
+| Syntaxe                       | Rôle                                                                                                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pd.to_datetime(series, ...)` | Convertit une colonne de texte en dates.                                                                                                                                                |
+| `format="%m/%Y"`              | Décrit le format attendu : `%m` pour le mois sur deux chiffres, `%Y` pour l'année sur quatre chiffres. Préciser le format évite les erreurs d'interprétation et accélère la conversion. |
+| `errors="coerce"`             | Toute valeur impossible à convertir devient `NaT` (l'équivalent de `NaN` pour les dates) au lieu de provoquer une erreur.                                                               |
+| `end_of_month=False`          | Paramètre qui choisit le jour retenu. Par défaut, c'est le 1er du mois.                                                                                                                 |
+| `pd.offsets.MonthEnd(0)`      | Avance la date jusqu'à la fin de son mois. Le `0` signifie « reste dans le mois courant » : sans lui, la date sauterait au mois suivant.                                                |
 
 ### Exemples
 
 | Texte d'origine | `end_of_month=False` | `end_of_month=True` |
-|---|---|---|
-| `12/2022` | 2022-12-01 | 2022-12-31 |
-| `02/2024` | 2024-02-01 | 2024-02-29 |
-| `09/2002` | 2002-09-01 | 2002-09-30 |
-| `abc` | `NaT` | `NaT` |
+| --------------- | -------------------- | ------------------- |
+| `12/2022`       | 2022-12-01           | 2022-12-31          |
+| `02/2024`       | 2024-02-01           | 2024-02-29          |
+| `09/2002`       | 2002-09-01           | 2002-09-30          |
+| `abc`           | `NaT`                | `NaT`               |
 
 La conversion tient compte des mois de longueur différente et des années bissextiles (février 2024 se termine le 29).
 
