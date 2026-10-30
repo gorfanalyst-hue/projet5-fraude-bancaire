@@ -439,3 +439,29 @@ def save_clean_tables(tables: dict, folder: Path = CLEAN_DIR) -> pd.DataFrame:
         rows.append({"table": name, "lignes": len(df), "colonnes": df.shape[1],
                      "taille du fichier (Mo)": round(path.stat().st_size / 1e6, 1)})
     return pd.DataFrame(rows).set_index("table")
+
+
+# =============================================================================
+# P3-12 : Résumé des transformations pour le journal
+# =============================================================================
+
+def transformation_summary(before: dict, after: dict) -> pd.DataFrame:
+    """
+    Compare chaque table avant et après le nettoyage : lignes, colonnes,
+    colonnes ajoutées et colonnes retirées.
+    before : {nom : (nombre de lignes, liste des colonnes)} mesuré au chargement
+    after : {nom : DataFrame nettoyé}
+    """
+    rows = []
+    for name, (n_rows, cols_before) in before.items():
+        df = after[name]
+        added = [c for c in df.columns if c not in cols_before]
+        removed = [c for c in cols_before if c not in df.columns]
+        rows.append({
+            "table": name,
+            "lignes avant": n_rows, "lignes après": len(df),
+            "colonnes avant": len(cols_before), "colonnes après": df.shape[1],
+            "colonnes ajoutées": ", ".join(added) or "aucune",
+            "colonnes retirées": ", ".join(removed) or "aucune",
+        })
+    return pd.DataFrame(rows).set_index("table")

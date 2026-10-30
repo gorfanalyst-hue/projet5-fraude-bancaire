@@ -120,6 +120,7 @@ Règles à respecter :
 | `docs/09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
 | `docs/10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
 | `docs/11_controles_rejoues.md` | Contrôles rejoués sur les tables nettoyées (P3-11) |
+| `docs/12_journal_transformations.md` | Journal des transformations (P3-12) |
 
 ## Livrables
 
