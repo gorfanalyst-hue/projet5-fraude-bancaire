@@ -27,7 +27,7 @@ Cinq sources, fournies par le cours. **Elles ne sont pas versionnées dans ce d�
 | `cards_data.csv` | Cartes (6 146) : marque, type, limite de crédit |
 | `transactions_data.csv` | Transactions (environ 13 millions), table de faits |
 | `mcc_codes.json` | Correspondance entre code MCC et catégorie de commerçant |
-| `fraud_labels.json` | Étiquette de fraude par transaction |
+| `fraud_labels.json` | Étiquette de fraude (Yes/No) pour 67 % des transactions |
 
 Les tables `users_data` et `cards_data` sont des tables de dimension, reliées à `transactions_data` par `client_id` et `card_id`.
 
@@ -40,6 +40,7 @@ projet5-fraude-bancaire/
 ├── src/
 │   ├── __init__.py
 │   ├── load_data.py       # fonctions de chargement communes
+│   ├── diagnostic.py      # fonctions de contrôle du diagnostic (phase 2)
 │   └── clean_data.py      # fonctions de nettoyage et de transformation
 ├── notebooks/             # notebooks d'exploration et d'analyse
 ├── docs/                  # documentation technique de l'équipe
@@ -66,7 +67,7 @@ projet5-fraude-bancaire/
 4. Ouvrir le dossier du dépôt dans VS Code. Le fichier `.vscode/settings.json` fait exécuter les notebooks depuis la racine du projet, ce qui permet d'écrire :
 
    ```python
-   from src.load_data import load_transactions, load_cards, load_users, load_mcc_codes
+   from src.load_data import load_transactions, load_cards, load_users, load_mcc_codes, load_fraud_labels
    ```
 
 ## Règles de travail
@@ -105,6 +106,7 @@ Règles à respecter :
 | `docs/05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
 | `docs/06_colonne_errors.md` | Transformation de la colonne errors (P3-06) |
 | `docs/07_lieu_transactions.md` | Structuration du lieu des transactions (P3-07) |
+| `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
 
 ## Livrables
 

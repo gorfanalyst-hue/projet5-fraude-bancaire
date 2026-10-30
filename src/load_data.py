@@ -29,7 +29,12 @@ def load_csv_chunked(path, dtype=None, parse_dates=None, chunksize=500_000, **kw
     return df
 
 
-def load_transactions(path=DATA_DIR / "transactions_data.csv"):
+def load_transactions(path=DATA_DIR / "transactions_data.csv", usecols=None):
+    """
+    Charge les transactions. Le paramètre usecols permet de ne lire que
+    certaines colonnes, par exemple ["id", "date", "use_chip"], pour économiser
+    la mémoire (ajout P2-17). Sans usecols, toutes les colonnes sont lues.
+    """
     dtype = {
         "id": "int32", "client_id": "int32", "card_id": "int32",
         "use_chip": "category", "merchant_id": "int32",
@@ -37,7 +42,10 @@ def load_transactions(path=DATA_DIR / "transactions_data.csv"):
         "mcc": "int16", "errors": "category",
         # amount reste en texte ($...) -> conversion en P3-02
     }
-    return load_csv_chunked(path, dtype=dtype, parse_dates=["date"])
+    if usecols is not None:
+        dtype = {col: t for col, t in dtype.items() if col in usecols}
+    parse_dates = ["date"] if usecols is None or "date" in usecols else None
+    return load_csv_chunked(path, dtype=dtype, parse_dates=parse_dates, usecols=usecols)
 
 
 def load_cards(path=DATA_DIR / "cards_data.csv"):
@@ -67,3 +75,28 @@ def load_mcc_codes(path=DATA_DIR / "mcc_codes.json"):
     df = pd.DataFrame(list(data.items()), columns=["mcc_code", "description"])
     df["mcc_code"] = df["mcc_code"].astype("int16")
     return df
+
+
+def load_fraud_labels(path=DATA_DIR / "fraud_labels.json"):
+    """
+    Charge les étiquettes de fraude (P2-17).
+
+    Le fichier a la forme {"target": {"<id de transaction>": "Yes" ou "No", ...}}
+    et ne couvre qu'une partie des transactions.
+
+    Retourne une table à deux colonnes :
+    - id : identifiant de la transaction (même clé que transactions_data)
+    - is_fraud : 1 pour une fraude, 0 sinon
+    """
+    with open(path, encoding="utf-8") as f:
+        labels = json.load(f)["target"]
+
+    values = pd.Series(list(labels.values()))
+    unknown = set(values.unique()) - {"Yes", "No"}
+    if unknown:
+        raise ValueError(f"Valeurs d'étiquette inattendues : {sorted(unknown)}")
+
+    return pd.DataFrame({
+        "id": pd.to_numeric(pd.Series(list(labels.keys()))).astype("int32"),
+        "is_fraud": (values == "Yes").astype("int8"),
+    })
