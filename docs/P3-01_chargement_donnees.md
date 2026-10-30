@@ -56,7 +56,7 @@ df_mcc = load_mcc_codes()
 
 **Important** : à partir de maintenant, on importe ces fonctions plutôt que de refaire un `pd.read_csv()` à la main dans son propre notebook, sinon on perd l'intérêt d'avoir une base commune.
 
-Si l'import échoue avec `ModuleNotFoundError: No module named 'src'`, vérifier que VS Code a bien ouvert le dossier **racine du dépôt** et que le fichier `.vscode/settings.json` est présent.
+Si l'import échoue avec `ModuleNotFoundError: No module named 'src'`, vérifier que VS Code a bien ouvert le dossier **racine du dépôt** et que votre fichier `.vscode/settings.json` contient le réglage `"jupyter.notebookFileRoot": "${workspaceFolder}"` (voir le README, étape 4).
 
 ## Comment vérifier que ça fonctionne
 

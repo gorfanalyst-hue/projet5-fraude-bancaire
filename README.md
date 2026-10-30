@@ -69,7 +69,15 @@ projet5-fraude-bancaire/
    pip install -r requirements.txt
    ```
 
-4. Ouvrir le dossier du dépôt dans VS Code. Le fichier `.vscode/settings.json` fait exécuter les notebooks depuis la racine du projet, ce qui permet d'écrire :
+4. Ouvrir le dossier du dépôt dans VS Code. Le dossier `.vscode/` n'est pas versionné : chacun y garde ses réglages personnels. Chaque membre doit donc créer son propre fichier `.vscode/settings.json` avec ce réglage, qui fait exécuter les notebooks depuis la racine du projet :
+
+   ```json
+   {
+     "jupyter.notebookFileRoot": "${workspaceFolder}"
+   }
+   ```
+
+   Sans ce réglage, les imports `from src...` échouent dans les notebooks. Avec lui, on peut écrire :
 
    ```python
    from src.load_data import load_transactions, load_cards, load_users, load_mcc_codes, load_fraud_labels
