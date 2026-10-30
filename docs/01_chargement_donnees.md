@@ -70,3 +70,47 @@ for name, df in [("transactions", df_transaction), ("cards", df_card),
 ```
 
 Si on compare avec une lecture « brute » (sans `dtype` précisé), on doit voir une réduction nette de la mémoire utilisée : c'est le signe que la fonction fait son travail.
+
+## Correction : garder le type `category` (P3-01, 29 octobre 2026)
+
+### Le problème
+
+La lecture par morceaux produit un tableau par morceau. Dans chaque morceau, une colonne de type `category` a ses propres catégories. Si ces catégories ne sont pas exactement les mêmes dans tous les morceaux, `pd.concat` remet la colonne en texte (`object`).
+
+Avant la correction, `use_chip`, `merchant_city`, `merchant_state` et `errors` étaient donc en `object` après le chargement de `transactions_data.csv`.
+
+### La correction
+
+Dans `load_csv_chunked`, après la concaténation :
+
+```python
+if dtype:
+    for col, col_type in dtype.items():
+        if col_type == "category" and col in df.columns:
+            df[col] = df[col].astype("category")
+```
+
+| Syntaxe | Rôle |
+|---|---|
+| `for col, col_type in dtype.items()` | Parcourt les types demandés au chargement. |
+| `col_type == "category" and col in df.columns` | Garde les colonnes qui devaient être des catégories et qui ont bien été lues. |
+| `df[col].astype("category")` | Remet le type `category` sur la table complète. |
+
+En pratique, seul `load_transactions` est concerné : `cards_data.csv` et `users_data.csv` tiennent en un seul morceau.
+
+### Résultats sur le fichier complet des transactions
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Colonnes de type `category` | aucune | `use_chip`, `merchant_city`, `merchant_state`, `errors` |
+| `memory_usage(deep=True)` | 4 321,9 Mo | 1 371,0 Mo |
+| `memory_usage(deep=False)` | 984,6 Mo | 639,1 Mo |
+| Mémoire ajoutée par une copie de la table | 832 Mo | 312 Mo |
+| Regroupement par ville (`groupby`) | 1,0 s | 0,2 s |
+| Mémoire du processus après le chargement | 1 476 Mo | 1 485 Mo |
+
+- La mémoire mesurée par pandas baisse fortement.
+- La mémoire du processus juste après le chargement ne change presque pas.
+- Le gain se voit dans les étapes suivantes : une copie de la table coûte 312 Mo au lieu de 832 Mo, et un regroupement par ville prend 0,2 s au lieu de 1,0 s.
+
+La colonne `amount` reste en texte : sa conversion se fait en P3-02.

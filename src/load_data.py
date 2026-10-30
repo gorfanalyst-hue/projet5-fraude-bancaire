@@ -16,7 +16,17 @@ def load_csv_chunked(path, dtype=None, parse_dates=None, chunksize=500_000, **kw
             chunksize=chunksize, low_memory=False, **kwargs
         )
     ]
-    return pd.concat(chunks, ignore_index=True)
+    df = pd.concat(chunks, ignore_index=True)
+
+    # Correction P3-01 : pd.concat ne garde le type "category" que si tous les
+    # morceaux ont exactement les mêmes catégories. Sinon, la colonne redevient
+    # du texte (object), qui prend beaucoup plus de mémoire. On remet donc le
+    # type "category" après la concaténation.
+    if dtype:
+        for col, col_type in dtype.items():
+            if col_type == "category" and col in df.columns:
+                df[col] = df[col].astype("category")
+    return df
 
 
 def load_transactions(path=DATA_DIR / "transactions_data.csv"):
