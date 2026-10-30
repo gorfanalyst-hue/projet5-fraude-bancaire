@@ -61,7 +61,7 @@ projet5-fraude-bancaire/
 3. Installer les bibliothèques nécessaires :
 
    ```bash
-   pip install pandas pyarrow jupyter
+   pip install pandas pyarrow jupyter matplotlib
    ```
 
 4. Ouvrir le dossier du dépôt dans VS Code. Le fichier `.vscode/settings.json` fait exécuter les notebooks depuis la racine du projet, ce qui permet d'écrire :
@@ -106,6 +106,7 @@ Règles à respecter :
 | `docs/05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
 | `docs/06_colonne_errors.md` | Transformation de la colonne errors (P3-06) |
 | `docs/07_lieu_transactions.md` | Structuration du lieu des transactions (P3-07) |
+| `docs/P2-16_rapport_diagnostic.md` | Rapport de diagnostic de la qualité des données (P2-16) |
 | `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
 
 ## Livrables
