@@ -313,3 +313,76 @@ def check_location_structuration(df: pd.DataFrame):
     print(f"  - Aux USA (physique)          : {int((df['merchant_country'] == 'USA').sum()):>10}\n")
     print(f"  - Désaccord ville/canal (online_channel_mismatch=1) : {int(df['online_channel_mismatch'].sum()):>10}")
  
+
+
+# =============================================================================
+# P3-08 : Règles pour les valeurs suspectes
+# =============================================================================
+# Règles choisies dans le rapport de diagnostic (P2-16) : aucune ligne n'est
+# supprimée et aucune valeur n'est modifiée. Chaque cas est signalé par un
+# indicateur 0/1, que les analyses pourront utiliser comme filtre.
+
+REPEAT_KEYS = ["card_id", "date", "amount", "merchant_id"]
+
+
+def flag_suspicious_transactions(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    P3-08 : ajoute trois indicateurs (int8 : 0/1) aux transactions :
+    - is_negative_amount : montant négatif ;
+    - is_zero_amount : montant nul ;
+    - is_repeated : seconde ligne d'un groupe répété (même carte, même minute,
+      même montant, même commerçant) dont aucune ligne n'a d'erreur.
+    Le montant doit déjà être numérique (P3-02).
+    """
+    df["is_negative_amount"] = (df["amount"] < 0).astype("int8")
+    df["is_zero_amount"] = (df["amount"] == 0).astype("int8")
+
+    # Seules les lignes des groupes répétés sont examinées
+    in_group = df.duplicated(subset=REPEAT_KEYS, keep=False)
+    group = df.loc[in_group, REPEAT_KEYS + ["errors"]]
+    group_has_error = (
+        group["errors"].notna()
+        .groupby([group[k] for k in REPEAT_KEYS])
+        .transform("any")
+    )
+    not_first = group.duplicated(subset=REPEAT_KEYS, keep="first")
+    flagged = not_first & ~group_has_error
+
+    is_repeated = pd.Series(0, index=df.index, dtype="int8")
+    is_repeated[flagged[flagged].index] = 1
+    df["is_repeated"] = is_repeated
+    return df
+
+
+def flag_suspicious_users(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    P3-08 : suspicious_income = 1 si le revenu annuel est inférieur à 1 000
+    ou si le revenu par habitant est nul. Les revenus doivent être numériques.
+    """
+    df["suspicious_income"] = (
+        (df["yearly_income"] < 1000) | (df["per_capita_income"] == 0)
+    ).astype("int8")
+    return df
+
+
+def flag_suspicious_cards(df: pd.DataFrame) -> pd.DataFrame:
+    """P3-08 : zero_credit_limit = 1 si la limite de crédit est nulle."""
+    df["zero_credit_limit"] = (df["credit_limit"] == 0).astype("int8")
+    return df
+
+
+def check_suspicious_flags(df_transaction, df_users, df_card) -> pd.DataFrame:
+    """
+    Critère de fin de P3-08 : chaque règle appliquée et tracée.
+    Retourne le nombre de lignes signalées par chaque indicateur.
+    """
+    rules = [
+        ("transactions", "is_negative_amount", "montant négatif", df_transaction),
+        ("transactions", "is_zero_amount", "montant nul", df_transaction),
+        ("transactions", "is_repeated", "seconde ligne d'un groupe répété sans erreur", df_transaction),
+        ("users", "suspicious_income", "revenu annuel < 1 000 ou revenu par habitant nul", df_users),
+        ("cards", "zero_credit_limit", "limite de crédit nulle", df_card),
+    ]
+    rows = [{"table": t, "indicateur": col, "règle": rule, "lignes": len(df),
+             "lignes signalées": int(df[col].sum())} for t, col, rule, df in rules]
+    return pd.DataFrame(rows)
