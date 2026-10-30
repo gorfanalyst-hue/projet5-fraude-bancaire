@@ -25,26 +25,26 @@ print("Tous les contrôles passent :", controles["statut"].all())
 
 ## Résultats obtenus
 
-| Contrôle | Obtenu | Passe |
-|---|---|---|
-| Lignes de transactions | 13 305 915 | oui |
-| Lignes de cards | 6 146 | oui |
-| Lignes de users | 2 000 | oui |
-| Lignes de mcc | 109 | oui |
-| Lignes de fraud_labels | 8 914 963 | oui |
-| Montants non numériques | aucun | oui |
-| Montants manquants | 0 | oui |
-| Dates non converties | aucune | oui |
-| Dates manquantes | 0 | oui |
-| Lignes orphelines (P2-02) | 0 | oui |
-| Client différent du titulaire (P2-03) | 0 | oui |
-| Codes MCC sans famille | 0 | oui |
-| Lieux manquants ou « UNKNOWN » (P3-07) | 0 | oui |
-| Totaux des erreurs différents de P2-13 | aucun | oui |
-| Colonnes retirées encore présentes (P3-09) | aucune | oui |
-| Indicateurs P3-08 absents | aucun | oui |
-| Identifiants de transaction en double | 0 | oui |
-| Étiquettes sans transaction (P2-17) | 0 | oui |
+| Contrôle                                   | Obtenu     | Passe |
+| ------------------------------------------ | ---------- | ----- |
+| Lignes de transactions                     | 13 305 915 | oui   |
+| Lignes de cards                            | 6 146      | oui   |
+| Lignes de users                            | 2 000      | oui   |
+| Lignes de mcc                              | 109        | oui   |
+| Lignes de fraud_labels                     | 8 914 963  | oui   |
+| Montants non numériques                    | aucun      | oui   |
+| Montants manquants                         | 0          | oui   |
+| Dates non converties                       | aucune     | oui   |
+| Dates manquantes                           | 0          | oui   |
+| Lignes orphelines (P2-02)                  | 0          | oui   |
+| Client différent du titulaire (P2-03)      | 0          | oui   |
+| Codes MCC sans famille                     | 0          | oui   |
+| Lieux manquants ou « UNKNOWN » (P3-07)     | 0          | oui   |
+| Totaux des erreurs différents de P2-13     | aucun      | oui   |
+| Colonnes retirées encore présentes (P3-09) | aucune     | oui   |
+| Indicateurs P3-08 absents                  | aucun      | oui   |
+| Identifiants de transaction en double      | 0          | oui   |
+| Étiquettes sans transaction (P2-17)        | 0          | oui   |
 
 **Les 18 contrôles passent. Critère de fin validé.**
 

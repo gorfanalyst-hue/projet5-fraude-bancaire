@@ -10,13 +10,13 @@ Le critère de fin du ticket est : **chaque règle appliquée et tracée**.
 
 ## Les règles
 
-| Table | Indicateur | Vaut 1 quand... |
-|---|---|---|
-| transactions | `is_negative_amount` | le montant est négatif |
-| transactions | `is_zero_amount` | le montant est nul |
-| transactions | `is_repeated` | la ligne est la seconde d'un groupe répété (même carte, même minute, même montant, même commerçant) dont aucune ligne n'a d'erreur |
-| users | `suspicious_income` | le revenu annuel est inférieur à 1 000 ou le revenu par habitant est nul |
-| cards | `zero_credit_limit` | la limite de crédit est nulle |
+| Table        | Indicateur           | Vaut 1 quand...                                                                                                                    |
+| ------------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| transactions | `is_negative_amount` | le montant est négatif                                                                                                             |
+| transactions | `is_zero_amount`     | le montant est nul                                                                                                                 |
+| transactions | `is_repeated`        | la ligne est la seconde d'un groupe répété (même carte, même minute, même montant, même commerçant) dont aucune ligne n'a d'erreur |
+| users        | `suspicious_income`  | le revenu annuel est inférieur à 1 000 ou le revenu par habitant est nul                                                           |
+| cards        | `zero_credit_limit`  | la limite de crédit est nulle                                                                                                      |
 
 Pour les groupes répétés avec une erreur, la seconde ligne n'est pas signalée : le diagnostic montre que le client a refait l'achat après un échec.
 
@@ -43,13 +43,13 @@ flagged = not_first & ~group_has_error
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
-| `(df["amount"] < 0).astype("int8")` | Donne 1 pour un montant négatif, 0 sinon. |
+| Syntaxe                                         | Rôle                                                                                                                      |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `(df["amount"] < 0).astype("int8")`             | Donne 1 pour un montant négatif, 0 sinon.                                                                                 |
 | `df.duplicated(subset=REPEAT_KEYS, keep=False)` | Marque toutes les lignes qui ont la même carte, la même minute, le même montant et le même commerçant qu'une autre ligne. |
-| `group["errors"].notna()...transform("any")` | Pour chaque groupe, indique si au moins une ligne a une erreur. Le résultat est recopié sur chaque ligne du groupe. |
-| `group.duplicated(..., keep="first")` | Marque les lignes qui ne sont pas la première de leur groupe. |
-| `not_first & ~group_has_error` | Garde les secondes lignes des groupes sans aucune erreur. |
+| `group["errors"].notna()...transform("any")`    | Pour chaque groupe, indique si au moins une ligne a une erreur. Le résultat est recopié sur chaque ligne du groupe.       |
+| `group.duplicated(..., keep="first")`           | Marque les lignes qui ne sont pas la première de leur groupe.                                                             |
+| `not_first & ~group_has_error`                  | Garde les secondes lignes des groupes sans aucune erreur.                                                                 |
 
 Seules les lignes des groupes répétés passent par le `groupby`, ce qui évite de regrouper 13 millions de lignes.
 
@@ -89,13 +89,13 @@ depenses = df_transaction[(df_transaction["is_negative_amount"] == 0)
 
 ## Résultats obtenus
 
-| Indicateur | Lignes | Lignes signalées |
-|---|---|---|
-| `is_negative_amount` | 13 305 915 | 660 049 |
-| `is_zero_amount` | 13 305 915 | 10 639 |
-| `is_repeated` | 13 305 915 | 15 |
-| `suspicious_income` | 2 000 | 15 |
-| `zero_credit_limit` | 6 146 | 31 |
+| Indicateur           | Lignes     | Lignes signalées |
+| -------------------- | ---------- | ---------------- |
+| `is_negative_amount` | 13 305 915 | 660 049          |
+| `is_zero_amount`     | 13 305 915 | 10 639           |
+| `is_repeated`        | 13 305 915 | 15               |
+| `suspicious_income`  | 2 000      | 15               |
+| `zero_credit_limit`  | 6 146      | 31               |
 
 - Les 15 lignes `is_repeated` correspondent aux 15 groupes sans erreur de P2-14.
 - `suspicious_income` signale 15 clients, comme le nombre de revenus par habitant nuls : les 8 revenus annuels inférieurs à 1 000 en font tous partie.

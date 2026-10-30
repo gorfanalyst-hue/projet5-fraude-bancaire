@@ -16,15 +16,15 @@ Dans `src/clean_data.py`. Le code a été écrit par Martin ; la relecture a ajo
 
 ## Règles de transformation
 
-| Colonne créée | Règle |
-|---|---|
-| `is_online` | 1 si la ville est « ONLINE » **ou** si `use_chip` vaut « Online Transaction ». |
-| `merchant_country` | « USA » si le code d'État est un État américain ou un territoire reconnu. Sinon, le nom du pays figurant dans la colonne d'État. |
-| `merchant_state_clean` | Code d'État pour les transactions américaines physiques. Une valeur de remplacement explicite pour les achats en ligne et à l'étranger, jamais une case vide. |
-| `merchant_city` | Ville propre, avec une valeur explicite pour les achats en ligne. |
-| `is_foreign` | 1 si le pays n'est pas « USA » pour une transaction physique. |
-| `zip_clean` | Code postal sur 5 chiffres (`zfill(5)` rétablit les zéros initiaux perdus, par exemple 2134 devient 02134). Valeur explicite pour les achats en ligne et à l'étranger. |
-| `online_channel_mismatch` | 1 si la ville est « ONLINE » mais que le canal n'est pas « Online Transaction ». C'est un indicateur de qualité, pas une correction. |
+| Colonne créée             | Règle                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `is_online`               | 1 si la ville est « ONLINE » **ou** si `use_chip` vaut « Online Transaction ».                                                                                         |
+| `merchant_country`        | « USA » si le code d'État est un État américain ou un territoire reconnu. Sinon, le nom du pays figurant dans la colonne d'État.                                       |
+| `merchant_state_clean`    | Code d'État pour les transactions américaines physiques. Une valeur de remplacement explicite pour les achats en ligne et à l'étranger, jamais une case vide.          |
+| `merchant_city`           | Ville propre, avec une valeur explicite pour les achats en ligne.                                                                                                      |
+| `is_foreign`              | 1 si le pays n'est pas « USA » pour une transaction physique.                                                                                                          |
+| `zip_clean`               | Code postal sur 5 chiffres (`zfill(5)` rétablit les zéros initiaux perdus, par exemple 2134 devient 02134). Valeur explicite pour les achats en ligne et à l'étranger. |
+| `online_channel_mismatch` | 1 si la ville est « ONLINE » mais que le canal n'est pas « Online Transaction ». C'est un indicateur de qualité, pas une correction.                                   |
 
 ## Décisions prises
 
@@ -52,25 +52,25 @@ Après une modification de `clean_data.py`, il faut redémarrer le kernel.
 
 Contrôle des valeurs manquantes :
 
-| Colonne | Valeurs manquantes | Valeurs « UNKNOWN » |
-|---|---|---|
-| `merchant_city` | 0 | 0 |
-| `merchant_state_clean` | 0 | 0 |
-| `merchant_country` | 0 | 0 |
-| `is_online` | 0 | sans objet |
-| `is_foreign` | 0 | sans objet |
-| `zip_clean` | 0 | 0 |
+| Colonne                | Valeurs manquantes | Valeurs « UNKNOWN » |
+| ---------------------- | ------------------ | ------------------- |
+| `merchant_city`        | 0                  | 0                   |
+| `merchant_state_clean` | 0                  | 0                   |
+| `merchant_country`     | 0                  | 0                   |
+| `is_online`            | 0                  | sans objet          |
+| `is_foreign`           | 0                  | sans objet          |
+| `zip_clean`            | 0                  | 0                   |
 
 **Critère de fin validé.**
 
 Répartition des 13 305 915 transactions :
 
-| Catégorie | Transactions | Part |
-|---|---|---|
-| Aux États-Unis, sur place | 11 653 209 | 87,6 % |
-| À l'étranger | 89 006 | 0,7 % |
-| En ligne (`is_online = 1`) | 1 563 700 | 11,8 % |
-| **Total** | **13 305 915** | **100 %** |
+| Catégorie                  | Transactions   | Part      |
+| -------------------------- | -------------- | --------- |
+| Aux États-Unis, sur place  | 11 653 209     | 87,6 %    |
+| À l'étranger               | 89 006         | 0,7 %     |
+| En ligne (`is_online = 1`) | 1 563 700      | 11,8 %    |
+| **Total**                  | **13 305 915** | **100 %** |
 
 Contrôle : 11 653 209 + 89 006 = 11 742 215, soit exactement le nombre de lignes dont la ville n'est pas « ONLINE ». En ajoutant les 1 563 700 achats en ligne, on retrouve 13 305 915.
 

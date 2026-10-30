@@ -90,24 +90,24 @@ if dtype:
             df[col] = df[col].astype("category")
 ```
 
-| Syntaxe | Rôle |
-|---|---|
-| `for col, col_type in dtype.items()` | Parcourt les types demandés au chargement. |
+| Syntaxe                                        | Rôle                                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `for col, col_type in dtype.items()`           | Parcourt les types demandés au chargement.                                    |
 | `col_type == "category" and col in df.columns` | Garde les colonnes qui devaient être des catégories et qui ont bien été lues. |
-| `df[col].astype("category")` | Remet le type `category` sur la table complète. |
+| `df[col].astype("category")`                   | Remet le type `category` sur la table complète.                               |
 
 En pratique, seul `load_transactions` est concerné : `cards_data.csv` et `users_data.csv` tiennent en un seul morceau.
 
 ### Résultats sur le fichier complet des transactions
 
-| Mesure | Avant | Après |
-|---|---|---|
-| Colonnes de type `category` | aucune | `use_chip`, `merchant_city`, `merchant_state`, `errors` |
-| `memory_usage(deep=True)` | 4 321,9 Mo | 1 371,0 Mo |
-| `memory_usage(deep=False)` | 984,6 Mo | 639,1 Mo |
-| Mémoire ajoutée par une copie de la table | 832 Mo | 312 Mo |
-| Regroupement par ville (`groupby`) | 1,0 s | 0,2 s |
-| Mémoire du processus après le chargement | 1 476 Mo | 1 485 Mo |
+| Mesure                                    | Avant      | Après                                                   |
+| ----------------------------------------- | ---------- | ------------------------------------------------------- |
+| Colonnes de type `category`               | aucune     | `use_chip`, `merchant_city`, `merchant_state`, `errors` |
+| `memory_usage(deep=True)`                 | 4 321,9 Mo | 1 371,0 Mo                                              |
+| `memory_usage(deep=False)`                | 984,6 Mo   | 639,1 Mo                                                |
+| Mémoire ajoutée par une copie de la table | 832 Mo     | 312 Mo                                                  |
+| Regroupement par ville (`groupby`)        | 1,0 s      | 0,2 s                                                   |
+| Mémoire du processus après le chargement  | 1 476 Mo   | 1 485 Mo                                                |
 
 - La mémoire mesurée par pandas baisse fortement.
 - La mémoire du processus juste après le chargement ne change presque pas.

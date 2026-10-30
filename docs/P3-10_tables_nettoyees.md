@@ -12,13 +12,13 @@ Le critère de fin du ticket est : **tables rechargées en quelques secondes**.
 
 Dans `data/clean/`. Comme tout le dossier `data/`, il n'est pas versionné : chaque membre crée ses fichiers en exécutant `notebooks/03_nettoyage_transformation.ipynb`.
 
-| Fichier | Lignes | Colonnes | Taille | Contenu |
-|---|---|---|---|---|
-| `transactions.parquet` | 13 305 915 | 30 | 320,0 Mo | Transactions nettoyées, avec les colonnes des erreurs (P3-06), du lieu (P3-07) et les indicateurs de P3-08 |
-| `cards.parquet` | 6 146 | 11 | 0,1 Mo | Cartes, sans les colonnes retirées en P3-09, avec `zero_credit_limit` |
-| `users.parquet` | 2 000 | 14 | 0,1 Mo | Clients, sans `address`, avec `suspicious_income` |
-| `mcc.parquet` | 109 | 4 | 0,0 Mo | Codes MCC avec leur famille et leur description en français |
-| `fraud_labels.parquet` | 8 914 963 | 2 | 41,0 Mo | Étiquettes de fraude : `id` et `is_fraud` |
+| Fichier                | Lignes     | Colonnes | Taille   | Contenu                                                                                                    |
+| ---------------------- | ---------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `transactions.parquet` | 13 305 915 | 30       | 320,0 Mo | Transactions nettoyées, avec les colonnes des erreurs (P3-06), du lieu (P3-07) et les indicateurs de P3-08 |
+| `cards.parquet`        | 6 146      | 11       | 0,1 Mo   | Cartes, sans les colonnes retirées en P3-09, avec `zero_credit_limit`                                      |
+| `users.parquet`        | 2 000      | 14       | 0,1 Mo   | Clients, sans `address`, avec `suspicious_income`                                                          |
+| `mcc.parquet`          | 109        | 4        | 0,0 Mo   | Codes MCC avec leur famille et leur description en français                                                |
+| `fraud_labels.parquet` | 8 914 963  | 2        | 41,0 Mo  | Étiquettes de fraude : `id` et `is_fraud`                                                                  |
 
 ## Où est le code ?
 
@@ -30,11 +30,11 @@ def load_clean_table(name, columns=None, folder=CLEAN_DIR):
     return pd.read_parquet(folder / f"{name}.parquet", columns=columns)
 ```
 
-| Syntaxe | Rôle |
-|---|---|
-| `name` | Nom de la table : `"transactions"`, `"cards"`, `"users"`, `"mcc"` ou `"fraud_labels"`. |
-| `columns` | Liste de colonnes à lire. Sans liste, toute la table est lue. |
-| `pd.read_parquet` | Lit le fichier. Il faut le paquet `pyarrow`, déjà dans `requirements.txt`. |
+| Syntaxe           | Rôle                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `name`            | Nom de la table : `"transactions"`, `"cards"`, `"users"`, `"mcc"` ou `"fraud_labels"`. |
+| `columns`         | Liste de colonnes à lire. Sans liste, toute la table est lue.                          |
+| `pd.read_parquet` | Lit le fichier. Il faut le paquet `pyarrow`, déjà dans `requirements.txt`.             |
 
 ## Comment l'utiliser dans les phases suivantes
 
@@ -53,13 +53,13 @@ df_labels = load_clean_table("fraud_labels")
 
 ## Résultats obtenus
 
-| Table | Secondes de lecture |
-|---|---|
-| transactions | 7,6 |
-| cards | 0,0 |
-| users | 0,0 |
-| mcc | 0,0 |
-| fraud_labels | 0,2 |
+| Table        | Secondes de lecture |
+| ------------ | ------------------- |
+| transactions | 5,8                 |
+| cards        | 0,0                 |
+| users        | 0,0                 |
+| mcc          | 0,0                 |
+| fraud_labels | 0,2                 |
 
 **Critère de fin validé.**
 
@@ -70,4 +70,4 @@ df_labels = load_clean_table("fraud_labels")
 
 ## À noter dans le journal des transformations (P3-12)
 
-Cinq tables enregistrées au format Parquet dans `data/clean/`. Relecture : 7,6 s pour les transactions, 0,2 s pour les étiquettes, 0,0 s pour les trois autres.
+Cinq tables enregistrées au format Parquet dans `data/clean/`. Relecture : 5,8 s pour les transactions, 0,2 s pour les étiquettes, 0,0 s pour les trois autres.

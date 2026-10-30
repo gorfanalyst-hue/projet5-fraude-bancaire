@@ -21,13 +21,13 @@ Aider la banque à lutter contre la fraude en :
 
 Cinq sources, fournies par le cours. **Elles ne sont pas versionnées dans ce dépôt** (volume important et colonnes sensibles comme `card_number` et `cvv`).
 
-| Fichier | Contenu |
-|---|---|
-| `users_data.csv` | Clients (2 000) : âge, revenus, dette, score de crédit |
-| `cards_data.csv` | Cartes (6 146) : marque, type, limite de crédit |
+| Fichier                 | Contenu                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `users_data.csv`        | Clients (2 000) : âge, revenus, dette, score de crédit                    |
+| `cards_data.csv`        | Cartes (6 146) : marque, type, limite de crédit                           |
 | `transactions_data.csv` | Transactions (13 305 915, de janvier 2010 à octobre 2019), table de faits |
-| `mcc_codes.json` | Catégories de commerçants (109 codes MCC) |
-| `fraud_labels.json` | Étiquette de fraude (Yes/No) pour 8 914 963 transactions, soit 67,0 % |
+| `mcc_codes.json`        | Catégories de commerçants (109 codes MCC)                                 |
+| `fraud_labels.json`     | Étiquette de fraude (Yes/No) pour 8 914 963 transactions, soit 67,0 %     |
 
 Les tables `users_data` et `cards_data` sont des tables de dimension, reliées à `transactions_data` par `client_id` et `card_id`.
 
@@ -105,44 +105,46 @@ Règles à respecter :
 - Une page de documentation par ticket dans `docs/`, nommée `<ticket>_<contenu>.md` (exemple : `P3-02_conversion_montants.md`).
 - Les fichiers de `src/` contiennent des fonctions réutilisables. Les notebooks contiennent l'exécution et l'analyse.
 - Ne jamais commiter de fichier de données (`.csv`, `.json`, `.parquet`).
-- Avant de commiter un notebook, faire **Clear All Outputs**, car certaines sorties affichent des données sensibles (numéros de carte).
+- Les notebooks sont versionnés **avec leurs sorties**, pour que les résultats se lisent directement sur GitHub. Avant de commiter un notebook :
+  - l'exécuter en entier, du début à la fin, sans erreur ;
+  - vérifier qu'aucune sortie n'affiche de donnée sensible (numéro de carte, CVV, adresse). Ces colonnes sont masquées dans l'exploration (P2-01) et retirées des tables nettoyées (P3-09).
 - Éviter que deux personnes modifient le même notebook en même temps.
 - Toute transformation de données doit être tracée dans le journal des transformations.
 
 ## Documentation
 
-| Document | Contenu |
-|---|---|
-| `docs/P1-04_dictionnaire_donnees.md` | Dictionnaire des données : une ligne par colonne (P1-04) |
-| `docs/P2-16_rapport_diagnostic.md` | Rapport de diagnostic de la qualité des données (P2-16) |
-| `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
-| `docs/P3-01_chargement_donnees.md` | Fonctions de chargement communes (P3-01) |
-| `docs/P3-02_conversion_montants.md` | Conversion des montants en nombres (P3-02) |
-| `docs/P3-03_conversion_dates.md` | Conversion des dates (P3-03) |
-| `docs/P3-04_table_mcc.md` | Table des catégories MCC (P3-04) |
-| `docs/P3-05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
-| `docs/P3-06_colonne_errors.md` | Transformation de la colonne errors (P3-06) |
-| `docs/P3-07_lieu_transactions.md` | Structuration du lieu des transactions (P3-07) |
-| `docs/P3-08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
-| `docs/P3-09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
-| `docs/P3-10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
-| `docs/P3-11_controles_rejoues.md` | Contrôles rejoués sur les tables nettoyées (P3-11) |
-| `docs/P3-12_journal_transformations.md` | Journal des transformations (P3-12) |
+| Document                                | Contenu                                                  |
+| --------------------------------------- | -------------------------------------------------------- |
+| `docs/P1-04_dictionnaire_donnees.md`    | Dictionnaire des données : une ligne par colonne (P1-04) |
+| `docs/P2-16_rapport_diagnostic.md`      | Rapport de diagnostic de la qualité des données (P2-16)  |
+| `docs/P2-17_etiquettes_fraude.md`       | Contrôle des étiquettes de fraude (P2-17)                |
+| `docs/P3-01_chargement_donnees.md`      | Fonctions de chargement communes (P3-01)                 |
+| `docs/P3-02_conversion_montants.md`     | Conversion des montants en nombres (P3-02)               |
+| `docs/P3-03_conversion_dates.md`        | Conversion des dates (P3-03)                             |
+| `docs/P3-04_table_mcc.md`               | Table des catégories MCC (P3-04)                         |
+| `docs/P3-05_familles_mcc.md`            | Regroupement des codes MCC en familles (P3-05)           |
+| `docs/P3-06_colonne_errors.md`          | Transformation de la colonne errors (P3-06)              |
+| `docs/P3-07_lieu_transactions.md`       | Structuration du lieu des transactions (P3-07)           |
+| `docs/P3-08_valeurs_suspectes.md`       | Règles pour les valeurs suspectes (P3-08)                |
+| `docs/P3-09_colonnes_retirees.md`       | Colonnes sensibles et inutiles retirées (P3-09)          |
+| `docs/P3-10_tables_nettoyees.md`        | Tables nettoyées enregistrées en Parquet (P3-10)         |
+| `docs/P3-11_controles_rejoues.md`       | Contrôles rejoués sur les tables nettoyées (P3-11)       |
+| `docs/P3-12_journal_transformations.md` | Journal des transformations (P3-12)                      |
 
 ## Livrables
 
-| Livrable | Date |
-|---|---|
-| Phases du projet et tâches granulaires | 5 octobre |
-| Diagnostic, nettoyage et transformation des données | 9 novembre |
-| Analyse exploratoire, rapport et présentation | 7 décembre |
-| Rapport final avec recommandations opérationnelles | 14 décembre |
+| Livrable                                            | Date        |
+| --------------------------------------------------- | ----------- |
+| Phases du projet et tâches granulaires              | 5 octobre   |
+| Diagnostic, nettoyage et transformation des données | 9 novembre  |
+| Analyse exploratoire, rapport et présentation       | 7 décembre  |
+| Rapport final avec recommandations opérationnelles  | 14 décembre |
 
 ### Livrable du 9 novembre : diagnostic, nettoyage et transformation
 
-| Partie | Notebook | Documents |
-|---|---|---|
-| Exploration des fichiers (P2-01) | `notebooks/01_exploration_donnees.ipynb` | `docs/P1-04_dictionnaire_donnees.md` |
-| Diagnostic de la qualité (phase 2) | `notebooks/02_diagnostic_qualite.ipynb` | `docs/P2-16_rapport_diagnostic.md`, `docs/P2-17_etiquettes_fraude.md` |
-| Nettoyage et transformation (phase 3) | `notebooks/03_nettoyage_transformation.ipynb` | `docs/P3-01_...` à `docs/P3-11_...` |
-| Synthèse des transformations | | `docs/P3-12_journal_transformations.md` |
+| Partie                                | Notebook                                      | Documents                                                             |
+| ------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| Exploration des fichiers (P2-01)      | `notebooks/01_exploration_donnees.ipynb`      | `docs/P1-04_dictionnaire_donnees.md`                                  |
+| Diagnostic de la qualité (phase 2)    | `notebooks/02_diagnostic_qualite.ipynb`       | `docs/P2-16_rapport_diagnostic.md`, `docs/P2-17_etiquettes_fraude.md` |
+| Nettoyage et transformation (phase 3) | `notebooks/03_nettoyage_transformation.ipynb` | `docs/P3-01_...` à `docs/P3-11_...`                                   |
+| Synthèse des transformations          |                                               | `docs/P3-12_journal_transformations.md`                               |

@@ -21,11 +21,11 @@ def drop_columns(df, columns):
     return df.drop(columns=[col for col in columns if col in df.columns])
 ```
 
-| Syntaxe | Rôle |
-|---|---|
-| `COLUMNS_TO_DROP` | La liste des colonnes à retirer, au même endroit pour toute l'équipe. |
+| Syntaxe                                         | Rôle                                                                                          |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `COLUMNS_TO_DROP`                               | La liste des colonnes à retirer, au même endroit pour toute l'équipe.                         |
 | `[col for col in columns if col in df.columns]` | Garde seulement les colonnes encore présentes : relancer la cellule ne provoque pas d'erreur. |
-| `df.drop(columns=...)` | Retire les colonnes. |
+| `df.drop(columns=...)`                          | Retire les colonnes.                                                                          |
 
 `check_columns_removed` vérifie, pour chaque colonne de la liste, qu'elle n'est plus dans sa table.
 
@@ -39,12 +39,12 @@ check_columns_removed({"cards": df_card, "users": df_users})
 
 ## Résultats obtenus
 
-| Table | Colonne | Encore présente |
-|---|---|---|
-| cards | `card_number` | non |
-| cards | `cvv` | non |
-| cards | `card_on_dark_web` | non |
-| users | `address` | non |
+| Table | Colonne            | Encore présente |
+| ----- | ------------------ | --------------- |
+| cards | `card_number`      | non             |
+| cards | `cvv`              | non             |
+| cards | `card_on_dark_web` | non             |
+| users | `address`          | non             |
 
 **Critère de fin validé.**
 

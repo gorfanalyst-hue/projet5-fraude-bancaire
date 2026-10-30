@@ -41,12 +41,12 @@ def load_fraud_labels(path=DATA_DIR / "fraud_labels.json"):
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
-| `json.load(f)["target"]` | Lit le fichier et garde le dictionnaire placé sous la clé `target`. |
+| Syntaxe                                | Rôle                                                                                                                               |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `json.load(f)["target"]`               | Lit le fichier et garde le dictionnaire placé sous la clé `target`.                                                                |
 | `set(values.unique()) - {"Yes", "No"}` | Cherche des valeurs autres que `Yes` et `No`. S'il y en a, la fonction s'arrête avec une erreur au lieu de les classer en silence. |
-| `pd.to_numeric(...).astype("int32")` | Les identifiants sont du texte dans le JSON : on les convertit en nombres, avec le même type que la colonne `id` des transactions. |
-| `(values == "Yes").astype("int8")` | Donne 1 pour une fraude et 0 sinon. |
+| `pd.to_numeric(...).astype("int32")`   | Les identifiants sont du texte dans le JSON : on les convertit en nombres, avec le même type que la colonne `id` des transactions. |
+| `(values == "Yes").astype("int8")`     | Donne 1 pour une fraude et 0 sinon.                                                                                                |
 
 La table obtenue a deux colonnes, `id` et `is_fraud`. Elle se joint aux transactions par la colonne `id`.
 
@@ -68,10 +68,10 @@ Elle affiche le nombre de transactions étiquetées, les identifiants en double,
 
 ## Fonctions 3 et 4 : `add_fraud_label` et `fraud_summary_by`
 
-| Fonction | Rôle |
-|---|---|
+| Fonction                            | Rôle                                                                                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `add_fraud_label(df_tx, df_labels)` | Ajoute la colonne `is_fraud` aux transactions : 1 (fraude), 0 (pas de fraude) ou vide (transaction sans étiquette). La jointure crée une copie : il vaut mieux ne passer que les colonnes utiles. |
-| `fraud_summary_by(df, col)` | Pour chaque valeur d'une colonne (année, canal...) : nombre de transactions, part étiquetée, nombre de fraudes et taux de fraude parmi les transactions étiquetées. |
+| `fraud_summary_by(df, col)`         | Pour chaque valeur d'une colonne (année, canal...) : nombre de transactions, part étiquetée, nombre de fraudes et taux de fraude parmi les transactions étiquetées.                               |
 
 ## Comment l'utiliser dans le notebook
 
@@ -91,37 +91,37 @@ fraud_summary_by(df_lab, "use_chip")
 
 ## Résultats obtenus
 
-| Contrôle | Résultat |
-|---|---|
-| Transactions étiquetées | 8 914 963, soit 67,0 % des 13 305 915 transactions |
-| Identifiants en double | 0 |
-| Identifiants absents des transactions | 0 |
-| Fraudes | 13 332, soit 0,150 % des transactions étiquetées |
+| Contrôle                              | Résultat                                           |
+| ------------------------------------- | -------------------------------------------------- |
+| Transactions étiquetées               | 8 914 963, soit 67,0 % des 13 305 915 transactions |
+| Identifiants en double                | 0                                                  |
+| Identifiants absents des transactions | 0                                                  |
+| Fraudes                               | 13 332, soit 0,150 % des transactions étiquetées   |
 
 **Critère de fin validé.**
 
 ### Par année
 
 | Année | Part étiquetée | Fraudes | Taux de fraude |
-|---|---|---|---|
-| 2010 | 67,0 % | 2 573 | 0,309 % |
-| 2011 | 66,9 % | 37 | 0,004 % |
-| 2012 | 67,0 % | 923 | 0,104 % |
-| 2013 | 67,1 % | 1 337 | 0,147 % |
-| 2014 | 67,0 % | 664 | 0,073 % |
-| 2015 | 67,0 % | 2 189 | 0,235 % |
-| 2016 | 67,0 % | 2 448 | 0,262 % |
-| 2017 | 67,0 % | 172 | 0,018 % |
-| 2018 | 67,0 % | 1 629 | 0,174 % |
-| 2019 | 67,0 % | 1 360 | 0,175 % |
+| ----- | -------------- | ------- | -------------- |
+| 2010  | 67,0 %         | 2 573   | 0,309 %        |
+| 2011  | 66,9 %         | 37      | 0,004 %        |
+| 2012  | 67,0 %         | 923     | 0,104 %        |
+| 2013  | 67,1 %         | 1 337   | 0,147 %        |
+| 2014  | 67,0 %         | 664     | 0,073 %        |
+| 2015  | 67,0 %         | 2 189   | 0,235 %        |
+| 2016  | 67,0 %         | 2 448   | 0,262 %        |
+| 2017  | 67,0 %         | 172     | 0,018 %        |
+| 2018  | 67,0 %         | 1 629   | 0,174 %        |
+| 2019  | 67,0 %         | 1 360   | 0,175 %        |
 
 ### Par canal de paiement
 
-| Canal | Part étiquetée | Fraudes | Taux de fraude |
-|---|---|---|---|
-| En ligne (Online Transaction) | 67,0 % | 8 779 | 0,841 % |
-| Puce (Chip Transaction) | 67,0 % | 3 176 | 0,099 % |
-| Bande magnétique (Swipe Transaction) | 67,0 % | 1 377 | 0,029 % |
+| Canal                                | Part étiquetée | Fraudes | Taux de fraude |
+| ------------------------------------ | -------------- | ------- | -------------- |
+| En ligne (Online Transaction)        | 67,0 %         | 8 779   | 0,841 %        |
+| Puce (Chip Transaction)              | 67,0 %         | 3 176   | 0,099 %        |
+| Bande magnétique (Swipe Transaction) | 67,0 %         | 1 377   | 0,029 %        |
 
 ## Ce que ces résultats changent pour la suite
 

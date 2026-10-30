@@ -14,10 +14,10 @@ Le critère de fin du ticket est : **table de correspondance validée**. Le clas
 
 ## Où est le code ?
 
-| Fichier | Contenu |
-|---|---|
+| Fichier               | Contenu                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------- |
 | `src/mcc_families.py` | La table de correspondance : les familles, leurs codes, et les descriptions françaises |
-| `src/clean_data.py` | Les fonctions `add_mcc_families` et `check_mcc_families` |
+| `src/clean_data.py`   | Les fonctions `add_mcc_families` et `check_mcc_families`                               |
 
 La table est écrite en **Python** et non dans un fichier CSV, parce que le `.gitignore` du dépôt ignore tous les fichiers `.csv` et `.json`. Une table CSV ne serait pas partagée avec l'équipe.
 
@@ -68,11 +68,11 @@ def add_mcc_families(df_mcc: pd.DataFrame) -> pd.DataFrame:
     return table
 ```
 
-| Syntaxe | Rôle |
-|---|---|
-| `df_mcc.copy()` | Travaille sur une copie, la table d'origine reste intacte. |
-| `.map(MCC_TO_FAMILLE)` | Remplace chaque code par la famille correspondante dans le dictionnaire. Un code absent du dictionnaire devient une valeur vide, ce qui permet de le repérer. |
-| `table["famille"] = ...` | Crée la nouvelle colonne `famille`. |
+| Syntaxe                  | Rôle                                                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `df_mcc.copy()`          | Travaille sur une copie, la table d'origine reste intacte.                                                                                                    |
+| `.map(MCC_TO_FAMILLE)`   | Remplace chaque code par la famille correspondante dans le dictionnaire. Un code absent du dictionnaire devient une valeur vide, ce qui permet de le repérer. |
+| `table["famille"] = ...` | Crée la nouvelle colonne `famille`.                                                                                                                           |
 
 ## Fonction 2 : `check_mcc_families`
 
@@ -85,20 +85,20 @@ def check_mcc_families(df_mcc, df_transaction) -> bool:
     return not (missing_family or missing_fr or extra)
 ```
 
-| Contrôle | Ce qu'il détecte |
-|---|---|
-| `missing_family` | Codes de la table MCC qui n'ont pas de famille (code oublié). |
-| `missing_fr` | Codes sans description française. |
-| `extra` | Codes présents dans le dictionnaire mais absents de la table MCC (faute de frappe dans un code). `set(...) - set(...)` calcule la différence entre deux ensembles. |
+| Contrôle         | Ce qu'il détecte                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `missing_family` | Codes de la table MCC qui n'ont pas de famille (code oublié).                                                                                                      |
+| `missing_fr`     | Codes sans description française.                                                                                                                                  |
+| `extra`          | Codes présents dans le dictionnaire mais absents de la table MCC (faute de frappe dans un code). `set(...) - set(...)` calcule la différence entre deux ensembles. |
 
 La fonction construit ensuite un résumé :
 
-| Syntaxe | Rôle |
-|---|---|
-| `df_transaction["mcc"].value_counts()` | Compte le nombre de transactions pour chaque code. |
-| `.merge(n_tx, left_on="mcc_code", right_index=True)` | Associe ce nombre à chaque ligne de la table MCC. |
-| `.groupby("famille").agg(...)` | Regroupe par famille : nombre de codes (`count`) et nombre de transactions (`sum`). |
-| `part_%` | Part de chaque famille dans l'ensemble des transactions. |
+| Syntaxe                                              | Rôle                                                                                |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `df_transaction["mcc"].value_counts()`               | Compte le nombre de transactions pour chaque code.                                  |
+| `.merge(n_tx, left_on="mcc_code", right_index=True)` | Associe ce nombre à chaque ligne de la table MCC.                                   |
+| `.groupby("famille").agg(...)`                       | Regroupe par famille : nombre de codes (`count`) et nombre de transactions (`sum`). |
+| `part_%`                                             | Part de chaque famille dans l'ensemble des transactions.                            |
 
 Elle retourne `True` si les trois listes de contrôle sont vides.
 
@@ -120,35 +120,35 @@ Après un changement dans `clean_data.py` ou `mcc_families.py`, il faut **redém
 
 Contrôles : aucun code sans famille, aucun code sans description française, aucun code du dictionnaire absent de la table. Résultat : `True`.
 
-| Famille | Codes | Transactions | Part |
-|---|---|---|---|
-| Transport, carburant et automobile | 15 | 3 352 312 | 25,2 % |
-| Alimentation | 3 | 3 182 334 | 23,9 % |
-| Restauration et bars | 3 | 1 747 967 | 13,1 % |
-| Grandes surfaces et commerces divers | 5 | 1 332 087 | 10,0 % |
-| Santé et soins | 8 | 886 034 | 6,7 % |
-| Services professionnels et financiers | 7 | 718 301 | 5,4 % |
-| Loisirs, culture et divertissement | 13 | 638 844 | 4,8 % |
-| Services publics et télécommunications | 5 | 626 682 | 4,7 % |
-| Maison, jardin et électronique | 15 | 352 851 | 2,7 % |
-| Vêtements, beauté et services personnels | 9 | 265 742 | 2,0 % |
-| Industrie et fabrication | 22 | 150 735 | 1,1 % |
-| Voyage et hébergement | 4 | 52 026 | 0,4 % |
-| **Total** | **109** | **13 305 915** | **100 %** |
+| Famille                                  | Codes   | Transactions   | Part      |
+| ---------------------------------------- | ------- | -------------- | --------- |
+| Transport, carburant et automobile       | 15      | 3 352 312      | 25,2 %    |
+| Alimentation                             | 3       | 3 182 334      | 23,9 %    |
+| Restauration et bars                     | 3       | 1 747 967      | 13,1 %    |
+| Grandes surfaces et commerces divers     | 5       | 1 332 087      | 10,0 %    |
+| Santé et soins                           | 8       | 886 034        | 6,7 %     |
+| Services professionnels et financiers    | 7       | 718 301        | 5,4 %     |
+| Loisirs, culture et divertissement       | 13      | 638 844        | 4,8 %     |
+| Services publics et télécommunications   | 5       | 626 682        | 4,7 %     |
+| Maison, jardin et électronique           | 15      | 352 851        | 2,7 %     |
+| Vêtements, beauté et services personnels | 9       | 265 742        | 2,0 %     |
+| Industrie et fabrication                 | 22      | 150 735        | 1,1 %     |
+| Voyage et hébergement                    | 4       | 52 026         | 0,4 %     |
+| **Total**                                | **109** | **13 305 915** | **100 %** |
 
 Les 109 codes sont classés, et les 13 305 915 transactions ont toutes une famille.
 
 ## Choix de classement retenus
 
-| Code | Description | Famille retenue | Raison |
-|---|---|---|---|
-| 4829 | Transferts d'argent | Services professionnels et financiers | Service financier |
-| 9402 | Services postaux (gouvernement) | Services publics et télécommunications | Service public |
-| 3132 | Articles en cuir | Vêtements, beauté et services personnels | Articles destinés aux consommateurs |
-| 3260 | Poterie et céramique | Maison, jardin et électronique | Décoration |
-| 3722, 3771, 3775, 4112 | Chemins de fer | Transport, carburant et automobile | Transport de voyageurs ou de marchandises, pas un service touristique |
-| 5921 | Magasins de bière, vin et spiritueux | Alimentation | Magasin de détail, distinct des bars |
-| 5815, 5816 | Biens numériques (médias, jeux) | Loisirs, culture et divertissement | Contenu de loisir |
+| Code                   | Description                          | Famille retenue                          | Raison                                                                |
+| ---------------------- | ------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------- |
+| 4829                   | Transferts d'argent                  | Services professionnels et financiers    | Service financier                                                     |
+| 9402                   | Services postaux (gouvernement)      | Services publics et télécommunications   | Service public                                                        |
+| 3132                   | Articles en cuir                     | Vêtements, beauté et services personnels | Articles destinés aux consommateurs                                   |
+| 3260                   | Poterie et céramique                 | Maison, jardin et électronique           | Décoration                                                            |
+| 3722, 3771, 3775, 4112 | Chemins de fer                       | Transport, carburant et automobile       | Transport de voyageurs ou de marchandises, pas un service touristique |
+| 5921                   | Magasins de bière, vin et spiritueux | Alimentation                             | Magasin de détail, distinct des bars                                  |
+| 5815, 5816             | Biens numériques (médias, jeux)      | Loisirs, culture et divertissement       | Contenu de loisir                                                     |
 
 Il n'y a pas de famille « Autres » : chaque code entre dans une famille précise. La famille « Grandes surfaces et commerces divers » regroupe les clubs-entrepôts, les magasins à rabais et les grands magasins.
 

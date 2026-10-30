@@ -18,16 +18,16 @@ Le critère de fin du ticket est : **totaux identiques à ceux de P2-13**.
 
 Le diagnostic montre sept types, tous connus :
 
-| Type d'erreur | Occurrences | Part des occurrences |
-|---|---|---|
-| Insufficient Balance (solde insuffisant) | 131 621 | 62,0 % |
-| Bad PIN | 32 482 | 15,3 % |
-| Technical Glitch (incident technique) | 26 633 | 12,5 % |
-| Bad Card Number | 7 925 | 3,7 % |
-| Bad Expiration | 6 295 | 3,0 % |
-| Bad CVV | 6 241 | 2,9 % |
-| Bad Zipcode | 1 138 | 0,5 % |
-| **Total** | **212 335** | **100 %** |
+| Type d'erreur                            | Occurrences | Part des occurrences |
+| ---------------------------------------- | ----------- | -------------------- |
+| Insufficient Balance (solde insuffisant) | 131 621     | 62,0 %               |
+| Bad PIN                                  | 32 482      | 15,3 %               |
+| Technical Glitch (incident technique)    | 26 633      | 12,5 %               |
+| Bad Card Number                          | 7 925       | 3,7 %                |
+| Bad Expiration                           | 6 295       | 3,0 %                |
+| Bad CVV                                  | 6 241       | 2,9 %                |
+| Bad Zipcode                              | 1 138       | 0,5 %                |
+| **Total**                                | **212 335** | **100 %**            |
 
 Ce sont des **occurrences** : une transaction qui cumule deux erreurs est comptée deux fois.
 
@@ -76,17 +76,17 @@ def transform_errors_column(df, error_col="errors"):
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
-| `.astype("string").fillna("")` | Convertit la colonne en texte et remplace les valeurs vides (transactions sans erreur) par une chaîne vide. |
-| `(s_err != "").astype("int8")` | `has_error` vaut 1 si le texte n'est pas vide. Le type `int8` prend un seul octet par ligne, ce qui limite la mémoire sur 13 millions de lignes. |
-| `s_err.unique()` | Liste les **valeurs distinctes** de la colonne (quelques dizaines de combinaisons), au lieu de travailler sur 13 millions de lignes. |
-| `val.split(",")` puis `token.strip()` | Découpe une valeur sur la virgule et retire les espaces autour de chaque morceau. |
-| `err_type in [...]` | Teste la présence **exacte** du type d'erreur parmi les morceaux. Une recherche de texte simple pourrait confondre deux types dont les noms se ressemblent. |
-| `mapping` | Dictionnaire `valeur : 0 ou 1`, calculé une seule fois par valeur distincte. |
-| `s_err.map(mapping)` | Applique ce dictionnaire à toute la colonne : c'est l'astuce qui rend la transformation rapide. |
-| `_slugify_error_name` | Construit le nom de la colonne : `Bad Card Number` devient `err_bad_card_number`. |
-| `df[auth_cols].sum(axis=1) > 0` | Additionne les cinq colonnes d'authentification sur chaque ligne : si le résultat est positif, l'indicateur `has_auth_error` vaut 1. |
+| Syntaxe                               | Rôle                                                                                                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.astype("string").fillna("")`        | Convertit la colonne en texte et remplace les valeurs vides (transactions sans erreur) par une chaîne vide.                                                 |
+| `(s_err != "").astype("int8")`        | `has_error` vaut 1 si le texte n'est pas vide. Le type `int8` prend un seul octet par ligne, ce qui limite la mémoire sur 13 millions de lignes.            |
+| `s_err.unique()`                      | Liste les **valeurs distinctes** de la colonne (quelques dizaines de combinaisons), au lieu de travailler sur 13 millions de lignes.                        |
+| `val.split(",")` puis `token.strip()` | Découpe une valeur sur la virgule et retire les espaces autour de chaque morceau.                                                                           |
+| `err_type in [...]`                   | Teste la présence **exacte** du type d'erreur parmi les morceaux. Une recherche de texte simple pourrait confondre deux types dont les noms se ressemblent. |
+| `mapping`                             | Dictionnaire `valeur : 0 ou 1`, calculé une seule fois par valeur distincte.                                                                                |
+| `s_err.map(mapping)`                  | Applique ce dictionnaire à toute la colonne : c'est l'astuce qui rend la transformation rapide.                                                             |
+| `_slugify_error_name`                 | Construit le nom de la colonne : `Bad Card Number` devient `err_bad_card_number`.                                                                           |
+| `df[auth_cols].sum(axis=1) > 0`       | Additionne les cinq colonnes d'authentification sur chaque ligne : si le résultat est positif, l'indicateur `has_auth_error` vaut 1.                        |
 
 Les colonnes créées sont : `has_error`, `err_bad_pin`, `err_bad_cvv`, `err_bad_card_number`, `err_bad_expiration`, `err_bad_zipcode`, `err_insufficient_balance`, `err_technical_glitch` et `has_auth_error`. La colonne d'origine `errors` est conservée.
 
@@ -112,12 +112,12 @@ def check_errors_transformation(df, error_col="errors"):
 
 ### Explication
 
-| Syntaxe | Rôle |
-|---|---|
-| `.str.split(",").explode()` | Découpe chaque valeur sur la virgule, puis place chaque morceau sur sa propre ligne. |
-| `.value_counts()` | Compte les occurrences de chaque type : c'est la référence calculée directement sur les données d'origine. |
-| `df[col_name].sum()` | Total de la colonne binaire (nombre de 1). |
-| `col_total == ref_total` | Compare le total de la colonne créée avec la référence. |
+| Syntaxe                                        | Rôle                                                                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.str.split(",").explode()`                    | Découpe chaque valeur sur la virgule, puis place chaque morceau sur sa propre ligne.                                                        |
+| `.value_counts()`                              | Compte les occurrences de chaque type : c'est la référence calculée directement sur les données d'origine.                                  |
+| `df[col_name].sum()`                           | Total de la colonne binaire (nombre de 1).                                                                                                  |
+| `col_total == ref_total`                       | Compare le total de la colonne créée avec la référence.                                                                                     |
 | `set(ref_counts.index) - set(ALL_ERROR_TYPES)` | Repère les types présents dans les données mais absents de la liste du code. Sans ce test, un type oublié serait ignoré sans avertissement. |
 
 La fonction retourne un résultat positif seulement si les sept totaux sont égaux **et** qu'il n'existe aucun type inconnu.
@@ -135,20 +135,20 @@ Après une modification de `clean_data.py`, il faut redémarrer le kernel.
 
 ## Résultats obtenus
 
-| Colonne | Total | Référence P2-13 | Statut |
-|---|---|---|---|
-| `err_bad_pin` | 32 482 | 32 482 | OK |
-| `err_bad_cvv` | 6 241 | 6 241 | OK |
-| `err_bad_card_number` | 7 925 | 7 925 | OK |
-| `err_bad_expiration` | 6 295 | 6 295 | OK |
-| `err_bad_zipcode` | 1 138 | 1 138 | OK |
-| `err_insufficient_balance` | 131 621 | 131 621 | OK |
-| `err_technical_glitch` | 26 633 | 26 633 | OK |
+| Colonne                    | Total   | Référence P2-13 | Statut |
+| -------------------------- | ------- | --------------- | ------ |
+| `err_bad_pin`              | 32 482  | 32 482          | OK     |
+| `err_bad_cvv`              | 6 241   | 6 241           | OK     |
+| `err_bad_card_number`      | 7 925   | 7 925           | OK     |
+| `err_bad_expiration`       | 6 295   | 6 295           | OK     |
+| `err_bad_zipcode`          | 1 138   | 1 138           | OK     |
+| `err_insufficient_balance` | 131 621 | 131 621         | OK     |
+| `err_technical_glitch`     | 26 633  | 26 633          | OK     |
 
-| Indicateur | Transactions | Part du total |
-|---|---|---|
-| `has_error` (au moins une erreur) | 211 393 | 1,6 % |
-| `has_auth_error` (échec d'authentification) | 53 977 | 0,4 % |
+| Indicateur                                  | Transactions | Part du total |
+| ------------------------------------------- | ------------ | ------------- |
+| `has_error` (au moins une erreur)           | 211 393      | 1,6 %         |
+| `has_auth_error` (échec d'authentification) | 53 977       | 0,4 %         |
 
 Aucun type d'erreur inconnu. **Critère de fin validé.**
 

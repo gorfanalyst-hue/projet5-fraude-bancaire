@@ -1,6 +1,7 @@
 """
 Fonctions de chargement communes (P3-01), utilisées par tous les notebooks.
 """
+
 import json
 from pathlib import Path
 
@@ -9,15 +10,21 @@ import pandas as pd
 # Dossier data/ situé à la racine du dépôt (un niveau au-dessus de src/)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
+
 def load_csv_chunked(path, dtype=None, parse_dates=None, chunksize=500_000, **kwargs):
     """
     Fonction commune : lit un CSV par morceaux pour limiter la mémoire,
     avec des dtypes légers définis à l'avance.
     """
     chunks = [
-        chunk for chunk in pd.read_csv(
-            path, dtype=dtype, parse_dates=parse_dates,
-            chunksize=chunksize, low_memory=False, **kwargs
+        chunk
+        for chunk in pd.read_csv(
+            path,
+            dtype=dtype,
+            parse_dates=parse_dates,
+            chunksize=chunksize,
+            low_memory=False,
+            **kwargs,
         )
     ]
     df = pd.concat(chunks, ignore_index=True)
@@ -40,10 +47,15 @@ def load_transactions(path=DATA_DIR / "transactions_data.csv", usecols=None):
     la mémoire (ajout P2-17). Sans usecols, toutes les colonnes sont lues.
     """
     dtype = {
-        "id": "int32", "client_id": "int32", "card_id": "int32",
-        "use_chip": "category", "merchant_id": "int32",
-        "merchant_city": "category", "merchant_state": "category",
-        "mcc": "int16", "errors": "category",
+        "id": "int32",
+        "client_id": "int32",
+        "card_id": "int32",
+        "use_chip": "category",
+        "merchant_id": "int32",
+        "merchant_city": "category",
+        "merchant_state": "category",
+        "mcc": "int16",
+        "errors": "category",
         # amount reste en texte ($...) -> conversion en P3-02
     }
     if usecols is not None:
@@ -55,9 +67,12 @@ def load_transactions(path=DATA_DIR / "transactions_data.csv", usecols=None):
 def load_cards(path=DATA_DIR / "cards_data.csv"):
     """Charge les cartes avec des types légers."""
     dtype = {
-        "id": "int32", "client_id": "int32",
-        "card_brand": "category", "card_type": "category",
-        "has_chip": "category", "num_cards_issued": "int8",
+        "id": "int32",
+        "client_id": "int32",
+        "card_brand": "category",
+        "card_type": "category",
+        "has_chip": "category",
+        "num_cards_issued": "int8",
         "card_on_dark_web": "category",
         # credit_limit en texte -> P3-02 ; expires/acct_open_date -> P3-03
     }
@@ -67,9 +82,14 @@ def load_cards(path=DATA_DIR / "cards_data.csv"):
 def load_users(path=DATA_DIR / "users_data.csv"):
     """Charge les clients avec des types légers."""
     dtype = {
-        "id": "int32", "current_age": "int8", "retirement_age": "int8",
-        "birth_year": "int16", "birth_month": "int8", "gender": "category",
-        "credit_score": "int16", "num_credit_cards": "int8",
+        "id": "int32",
+        "current_age": "int8",
+        "retirement_age": "int8",
+        "birth_year": "int16",
+        "birth_month": "int8",
+        "gender": "category",
+        "credit_score": "int16",
+        "num_credit_cards": "int8",
         # per_capita_income, yearly_income, total_debt en texte -> P3-02
     }
     return load_csv_chunked(path, dtype=dtype)
@@ -103,11 +123,12 @@ def load_fraud_labels(path=DATA_DIR / "fraud_labels.json"):
     if unknown:
         raise ValueError(f"Valeurs d'étiquette inattendues : {sorted(unknown)}")
 
-    return pd.DataFrame({
-        "id": pd.to_numeric(pd.Series(list(labels.keys()))).astype("int32"),
-        "is_fraud": (values == "Yes").astype("int8"),
-    })
-
+    return pd.DataFrame(
+        {
+            "id": pd.to_numeric(pd.Series(list(labels.keys()))).astype("int32"),
+            "is_fraud": (values == "Yes").astype("int8"),
+        }
+    )
 
 
 CLEAN_DIR = DATA_DIR / "clean"
