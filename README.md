@@ -109,6 +109,7 @@ Règles à respecter :
 | `docs/P2-16_rapport_diagnostic.md` | Rapport de diagnostic de la qualité des données (P2-16) |
 | `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
 | `docs/08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
+| `docs/09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
 
 ## Livrables
 

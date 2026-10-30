@@ -386,3 +386,32 @@ def check_suspicious_flags(df_transaction, df_users, df_card) -> pd.DataFrame:
     rows = [{"table": t, "indicateur": col, "règle": rule, "lignes": len(df),
              "lignes signalées": int(df[col].sum())} for t, col, rule, df in rules]
     return pd.DataFrame(rows)
+
+
+# =============================================================================
+# P3-09 : Colonnes sensibles et inutiles
+# =============================================================================
+
+# Colonnes sensibles et colonne à valeur unique (confirmée en P2-11)
+COLUMNS_TO_DROP = {
+    "cards": ["card_number", "cvv", "card_on_dark_web"],
+    "users": ["address"],
+}
+
+
+def drop_columns(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+    """P3-09 : retire les colonnes indiquées. Une colonne déjà absente est ignorée."""
+    return df.drop(columns=[col for col in columns if col in df.columns])
+
+
+def check_columns_removed(tables: dict, removed: dict = COLUMNS_TO_DROP) -> pd.DataFrame:
+    """
+    Critère de fin de P3-09 : les colonnes retirées sont absentes des tables.
+    tables : dictionnaire {nom : DataFrame}.
+    """
+    rows = []
+    for name, columns in removed.items():
+        for col in columns:
+            rows.append({"table": name, "colonne": col,
+                         "encore présente": col in tables[name].columns})
+    return pd.DataFrame(rows)
