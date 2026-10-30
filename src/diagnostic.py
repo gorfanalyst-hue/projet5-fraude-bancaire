@@ -409,3 +409,84 @@ def check_monthly_continuity(counts: pd.Series) -> pd.Series:
         "mois le plus faible": f"{counts.idxmin()} ({counts.min()} transactions)",
         "mois le plus fort": f"{counts.idxmax()} ({counts.max()} transactions)",
     }, dtype=object)
+
+
+
+# =============================================================================
+# P3-11 : Contrôles rejoués sur les tables nettoyées
+# =============================================================================
+
+def check_clean_tables(tables: dict, expected_rows: dict, error_reference: pd.Series) -> pd.DataFrame:
+    """
+    Rejoue les contrôles du diagnostic sur les tables nettoyées (rechargées
+    depuis data/clean/). Retourne une ligne par contrôle, avec le résultat
+    obtenu et le statut (True si le contrôle passe).
+
+    tables : {"transactions", "cards", "users", "mcc", "fraud_labels"} -> DataFrame
+    expected_rows : nombre de lignes de chaque table avant le nettoyage
+    error_reference : totaux des types d'erreur mesurés en P2-13
+    """
+    tx, card, users = tables["transactions"], tables["cards"], tables["users"]
+    mcc, labels = tables["mcc"], tables["fraud_labels"]
+    rows = []
+
+    def add(name, obtenu, ok):
+        rows.append({"contrôle": name, "obtenu": obtenu, "statut": bool(ok)})
+
+    # 1. Aucune ligne perdue
+    for name, n in expected_rows.items():
+        add(f"lignes de {name}", len(tables[name]), len(tables[name]) == n)
+
+    # 2. Montants numériques, sans valeur manquante
+    money = [("transactions", "amount"), ("cards", "credit_limit"),
+             ("users", "per_capita_income"), ("users", "yearly_income"), ("users", "total_debt")]
+    not_numeric = [f"{t}.{c}" for t, c in money if not pd.api.types.is_numeric_dtype(tables[t][c])]
+    add("montants non numériques", ", ".join(not_numeric) or "aucun", not not_numeric)
+    n_missing = sum(int(tables[t][c].isna().sum()) for t, c in money)
+    add("montants manquants", n_missing, n_missing == 0)
+
+    # 3. Dates converties, sans valeur manquante
+    dates = [("transactions", "date"), ("cards", "expires"), ("cards", "acct_open_date")]
+    not_dates = [f"{t}.{c}" for t, c in dates if not pd.api.types.is_datetime64_any_dtype(tables[t][c])]
+    add("dates non converties", ", ".join(not_dates) or "aucune", not not_dates)
+    n_nat = sum(int(tables[t][c].isna().sum()) for t, c in dates)
+    add("dates manquantes", n_nat, n_nat == 0)
+
+    # 4. Liens entre les tables (P2-02) et titulaire de la carte (P2-03)
+    n_orphan = int(check_table_links(tx, users, card, mcc)["orphelines"].sum())
+    add("lignes orphelines (P2-02)", n_orphan, n_orphan == 0)
+    n_owner = int(check_card_owner(tx, card)["client différent du titulaire de la carte"])
+    add("client différent du titulaire (P2-03)", n_owner, n_owner == 0)
+
+    # 5. Familles MCC (P3-05)
+    n_no_family = int(mcc["famille"].isna().sum())
+    add("codes MCC sans famille", n_no_family, n_no_family == 0)
+
+    # 6. Colonnes de lieu (P3-07) : ni manquant ni « UNKNOWN »
+    loc_cols = ["merchant_city", "merchant_state_clean", "merchant_country", "zip_clean"]
+    n_bad = sum(int(tx[c].isna().sum() + (tx[c] == "UNKNOWN").sum()) for c in loc_cols)
+    add("lieux manquants ou « UNKNOWN » (P3-07)", n_bad, n_bad == 0)
+
+    # 7. Colonnes binaires des erreurs (P3-06) égales aux totaux de P2-13
+    gaps = [e for e, n in error_reference.items()
+            if int(tx["err_" + e.lower().replace(" ", "_")].sum()) != int(n)]
+    add("totaux des erreurs différents de P2-13", ", ".join(gaps) or "aucun", not gaps)
+
+    # 8. Colonnes retirées (P3-09)
+    present = [c for c in ["card_number", "cvv", "card_on_dark_web"] if c in card.columns]
+    present += [c for c in ["address"] if c in users.columns]
+    add("colonnes retirées encore présentes (P3-09)", ", ".join(present) or "aucune", not present)
+
+    # 9. Indicateurs des valeurs suspectes (P3-08)
+    flags = [("transactions", "is_negative_amount"), ("transactions", "is_zero_amount"),
+             ("transactions", "is_repeated"), ("users", "suspicious_income"), ("cards", "zero_credit_limit")]
+    missing_flags = [f"{t}.{c}" for t, c in flags if c not in tables[t].columns]
+    add("indicateurs P3-08 absents", ", ".join(missing_flags) or "aucun", not missing_flags)
+
+    # 10. Identifiants uniques et étiquettes cohérentes (P2-17)
+    n_dup = int(tx["id"].duplicated().sum())
+    add("identifiants de transaction en double", n_dup, n_dup == 0)
+    n_absent = int((~labels["id"].isin(tx["id"])).sum())
+    add("étiquettes sans transaction (P2-17)", n_absent, n_absent == 0)
+
+    return pd.DataFrame(rows)

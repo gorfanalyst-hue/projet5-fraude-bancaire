@@ -119,6 +119,7 @@ Règles à respecter :
 | `docs/08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
 | `docs/09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
 | `docs/10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
+| `docs/11_controles_rejoues.md` | Contrôles rejoués sur les tables nettoyées (P3-11) |
 
 ## Livrables
 
