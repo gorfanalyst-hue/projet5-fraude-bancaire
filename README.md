@@ -113,6 +113,7 @@ Règles à respecter :
 
 | Document | Contenu |
 |---|---|
+| `docs/P1-04_dictionnaire_donnees.md` | Dictionnaire des données : une ligne par colonne (P1-04) |
 | `docs/P2-16_rapport_diagnostic.md` | Rapport de diagnostic de la qualité des données (P2-16) |
 | `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
 | `docs/P3-01_chargement_donnees.md` | Fonctions de chargement communes (P3-01) |
@@ -141,7 +142,7 @@ Règles à respecter :
 
 | Partie | Notebook | Documents |
 |---|---|---|
-| Exploration des fichiers (P2-01) | `notebooks/01_exploration_donnees.ipynb` | |
+| Exploration des fichiers (P2-01) | `notebooks/01_exploration_donnees.ipynb` | `docs/P1-04_dictionnaire_donnees.md` |
 | Diagnostic de la qualité (phase 2) | `notebooks/02_diagnostic_qualite.ipynb` | `docs/P2-16_rapport_diagnostic.md`, `docs/P2-17_etiquettes_fraude.md` |
 | Nettoyage et transformation (phase 3) | `notebooks/03_nettoyage_transformation.ipynb` | `docs/P3-01_...` à `docs/P3-11_...` |
 | Synthèse des transformations | | `docs/P3-12_journal_transformations.md` |
