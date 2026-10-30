@@ -100,3 +100,16 @@ def load_fraud_labels(path=DATA_DIR / "fraud_labels.json"):
         "id": pd.to_numeric(pd.Series(list(labels.keys()))).astype("int32"),
         "is_fraud": (values == "Yes").astype("int8"),
     })
+
+
+
+CLEAN_DIR = DATA_DIR / "clean"
+
+
+def load_clean_table(name, columns=None, folder=CLEAN_DIR):
+    """
+    Charge une table nettoyée enregistrée en P3-10 :
+    "transactions", "cards", "users", "mcc" ou "fraud_labels".
+    columns permet de ne lire que certaines colonnes.
+    """
+    return pd.read_parquet(folder / f"{name}.parquet", columns=columns)

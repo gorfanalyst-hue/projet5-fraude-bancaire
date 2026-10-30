@@ -45,6 +45,7 @@ projet5-fraude-bancaire/
 ├── notebooks/             # notebooks d'exploration et d'analyse
 ├── docs/                  # documentation technique de l'équipe
 └── data/                  # fichiers de données (ignoré par Git)
+    └── clean/             # tables nettoyées au format Parquet (P3-10)
 ```
 
 ## Installation
@@ -68,6 +69,13 @@ projet5-fraude-bancaire/
 
    ```python
    from src.load_data import load_transactions, load_cards, load_users, load_mcc_codes, load_fraud_labels
+   ```
+
+5. Pour travailler sur les données nettoyées, exécuter une fois `notebooks/03_nettoyage.ipynb`. Il crée les fichiers de `data/clean/`, qui se relisent ensuite en quelques secondes :
+
+   ```python
+   from src.load_data import load_clean_table
+   df_transaction = load_clean_table("transactions")
    ```
 
 ## Règles de travail
@@ -110,6 +118,7 @@ Règles à respecter :
 | `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
 | `docs/08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
 | `docs/09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
+| `docs/10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
 
 ## Livrables
 

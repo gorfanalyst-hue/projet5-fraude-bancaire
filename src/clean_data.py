@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 def convert_currency_column(series: pd.Series) -> pd.Series:
@@ -415,3 +417,25 @@ def check_columns_removed(tables: dict, removed: dict = COLUMNS_TO_DROP) -> pd.D
             rows.append({"table": name, "colonne": col,
                          "encore présente": col in tables[name].columns})
     return pd.DataFrame(rows)
+
+
+# =============================================================================
+# P3-10 : Enregistrement des tables nettoyées
+# =============================================================================
+
+CLEAN_DIR = Path(__file__).resolve().parent.parent / "data" / "clean"
+
+
+def save_clean_tables(tables: dict, folder: Path = CLEAN_DIR) -> pd.DataFrame:
+    """
+    P3-10 : enregistre chaque table au format Parquet dans data/clean/.
+    Retourne, pour chaque table, le nombre de lignes, de colonnes et la taille du fichier.
+    """
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for name, df in tables.items():
+        path = folder / f"{name}.parquet"
+        df.to_parquet(path, index=False)
+        rows.append({"table": name, "lignes": len(df), "colonnes": df.shape[1],
+                     "taille du fichier (Mo)": round(path.stat().st_size / 1e6, 1)})
+    return pd.DataFrame(rows).set_index("table")
