@@ -10,7 +10,7 @@ Le critère de fin du ticket est : **tables rechargées en quelques secondes**.
 
 ## Où sont les fichiers ?
 
-Dans `data/clean/`. Comme tout le dossier `data/`, il n'est pas versionné : chaque membre crée ses fichiers en exécutant `notebooks/03_nettoyage.ipynb`.
+Dans `data/clean/`. Comme tout le dossier `data/`, il n'est pas versionné : chaque membre crée ses fichiers en exécutant `notebooks/03_nettoyage_transformation.ipynb`.
 
 | Fichier | Lignes | Colonnes | Taille | Contenu |
 |---|---|---|---|---|

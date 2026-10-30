@@ -40,10 +40,10 @@ Parmi les territoires de la liste, seul le district de Columbia (`DC`) est prés
 ## Comment l'utiliser dans le notebook
 
 ```python
-from src.clean_data import structurer_lieu_transactions, check_location_structuration
+from src.clean_data import structure_transaction_location, check_transaction_location
 
-df_transaction = structurer_lieu_transactions(df_transaction)
-check_location_structuration(df_transaction)
+df_transaction = structure_transaction_location(df_transaction)
+check_transaction_location(df_transaction)
 ```
 
 Après une modification de `clean_data.py`, il faut redémarrer le kernel.

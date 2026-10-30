@@ -10,7 +10,7 @@ Le critère de fin du ticket est : **tous les contrôles passent**.
 
 Dans `src/diagnostic.py` : `check_clean_tables`. Elle réutilise les contrôles de la phase 2 (`check_table_links`, `check_card_owner`) et retourne une ligne par contrôle, avec le résultat obtenu et le statut.
 
-Deux références sont mesurées au chargement des fichiers bruts, au début de `notebooks/03_nettoyage.ipynb` :
+Deux références sont mesurées au chargement des fichiers bruts, au début de `notebooks/03_nettoyage_transformation.ipynb` :
 
 - le nombre de lignes de chaque table ;
 - les totaux des types d'erreur (comme en P2-13).

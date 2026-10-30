@@ -1,6 +1,6 @@
 # P3-12 : Journal des transformations
 
-Ce journal trace, table par table, ce que le nettoyage a changé. Tous les chiffres viennent des sorties de `notebooks/03_nettoyage.ipynb`. Le détail de chaque étape est dans les pages `docs/01` à `docs/11`.
+Ce journal trace, table par table, ce que le nettoyage a changé. Tous les chiffres viennent des sorties de `notebooks/03_nettoyage_transformation.ipynb`. Le détail de chaque étape est dans les pages `docs/P3-01` à `docs/P3-11`.
 
 ## Vue d'ensemble
 

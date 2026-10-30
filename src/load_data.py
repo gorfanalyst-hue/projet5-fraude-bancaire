@@ -1,6 +1,10 @@
-import pandas as pd
+"""
+Fonctions de chargement communes (P3-01), utilisées par tous les notebooks.
+"""
 import json
 from pathlib import Path
+
+import pandas as pd
 
 # Dossier data/ situé à la racine du dépôt (un niveau au-dessus de src/)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -49,6 +53,7 @@ def load_transactions(path=DATA_DIR / "transactions_data.csv", usecols=None):
 
 
 def load_cards(path=DATA_DIR / "cards_data.csv"):
+    """Charge les cartes avec des types légers."""
     dtype = {
         "id": "int32", "client_id": "int32",
         "card_brand": "category", "card_type": "category",
@@ -60,6 +65,7 @@ def load_cards(path=DATA_DIR / "cards_data.csv"):
 
 
 def load_users(path=DATA_DIR / "users_data.csv"):
+    """Charge les clients avec des types légers."""
     dtype = {
         "id": "int32", "current_age": "int8", "retirement_age": "int8",
         "birth_year": "int16", "birth_month": "int8", "gender": "category",
@@ -70,7 +76,8 @@ def load_users(path=DATA_DIR / "users_data.csv"):
 
 
 def load_mcc_codes(path=DATA_DIR / "mcc_codes.json"):
-    with open(path) as f:
+    """Charge la table des codes MCC : mcc_code (int16) et description."""
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     df = pd.DataFrame(list(data.items()), columns=["mcc_code", "description"])
     df["mcc_code"] = df["mcc_code"].astype("int16")

@@ -1,6 +1,20 @@
+"""
+Fonctions de nettoyage et de transformation (phase 3).
+
+Chaque section correspond à un ticket Jira. Les fonctions de contrôle
+(check_...) vérifient le critère de fin du ticket.
+"""
 from pathlib import Path
 
 import pandas as pd
+
+from src.diagnostic import REPEAT_KEYS
+from src.mcc_families import MCC_TO_FAMILLE, MCC_DESCRIPTIONS_FR
+
+
+# =============================================================================
+# P3-02 : Conversion des montants
+# =============================================================================
 
 def convert_currency_column(series: pd.Series) -> pd.Series:
     """
@@ -26,7 +40,11 @@ def report_conversion_issues(original: pd.Series, converted: pd.Series, label: s
     if n_failed > 0:
         print(original[failed_mask].unique()[:10])
 
-# Conversion des dates
+
+# =============================================================================
+# P3-03 : Conversion des dates
+# =============================================================================
+
 def convert_month_year_column(series: pd.Series, end_of_month: bool = False) -> pd.Series:
     """
     Convertit une colonne texte 'mm/aaaa' en datetime.
@@ -47,6 +65,10 @@ def check_datetime_column(series: pd.Series, label: str):
           f"manquantes={series.isna().sum()}, "
           f"min={series.min()}, max={series.max()}")
 
+
+# =============================================================================
+# P3-04 : Table des catégories MCC
+# =============================================================================
 
 def build_mcc_table(df_mcc: pd.DataFrame) -> pd.DataFrame:
     """
@@ -84,7 +106,9 @@ def check_mcc_join(df_transaction: pd.DataFrame, df_mcc: pd.DataFrame) -> bool:
     return n_before == n_after and n_orphan == 0
 
 
-from src.mcc_families import MCC_TO_FAMILLE, MCC_DESCRIPTIONS_FR
+# =============================================================================
+# P3-05 : Familles de codes MCC
+# =============================================================================
 
 def add_mcc_families(df_mcc: pd.DataFrame) -> pd.DataFrame:
     """Ajoute la famille et la description française à la table MCC."""
@@ -120,7 +144,7 @@ def check_mcc_families(df_mcc: pd.DataFrame, df_transaction: pd.DataFrame) -> bo
 # =============================================================================
 # P3-06 : Transformation de la colonne errors
 # =============================================================================
- 
+
 # Liste standard des erreurs simples et sous-ensemble des échecs d'authentification (cf. P4-06)
 ALL_ERROR_TYPES = [
     "Bad PIN",
@@ -131,7 +155,7 @@ ALL_ERROR_TYPES = [
     "Insufficient Balance",
     "Technical Glitch",
 ]
- 
+
 AUTH_ERROR_TYPES = [
     "Bad PIN",
     "Bad CVV",
@@ -139,13 +163,13 @@ AUTH_ERROR_TYPES = [
     "Bad Expiration",
     "Bad Zipcode",
 ]
- 
- 
+
+
 def _slugify_error_name(err_name: str) -> str:
     """Transforme 'Bad Card Number' en 'err_bad_card_number'."""
     return "err_" + err_name.lower().replace(" ", "_")
- 
- 
+
+
 def transform_errors_column(
     df: pd.DataFrame, error_col: str = "errors"
 ) -> pd.DataFrame:
@@ -156,10 +180,10 @@ def transform_errors_column(
     - Un indicateur 'has_auth_error' (échec d'authentification : PIN, CVV, numéro, expiration, zip)
     """
     s_err = df[error_col].astype("string").fillna("")
- 
+
     # 1. Indicateur "au moins une erreur"
     df["has_error"] = (s_err != "").astype("int8")
- 
+
     # 2. Une colonne oui/non (int8) par type d'erreur
     # Astuce mémoire/vitesse : calculer sur les modalités uniques puis mapper
     unique_vals = s_err.unique()
@@ -171,14 +195,14 @@ def transform_errors_column(
             for val in unique_vals
         }
         df[col_name] = s_err.map(mapping).astype("int8")
- 
+
     # 3. Indicateur "échec d'authentification"
     auth_cols = [_slugify_error_name(e) for e in AUTH_ERROR_TYPES]
     df["has_auth_error"] = (df[auth_cols].sum(axis=1) > 0).astype("int8")
- 
+
     return df
- 
- 
+
+
 def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
     """
     Vérifie le critère de fin de P3-06 :
@@ -186,7 +210,7 @@ def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
     """
     print("=== Contrôle P3-06 : Transformation de la colonne 'errors' ===")
     s_err = df[error_col].dropna().astype(str)
- 
+
     # Comptage de référence façon P2-13 (explosion des chaînes séparées par virgule)
     ref_counts = (
         s_err.str.split(",")
@@ -194,7 +218,7 @@ def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
         .str.strip()
         .value_counts()
     )
- 
+
     all_match = True
     for err_type in ALL_ERROR_TYPES:
         col_name = _slugify_error_name(err_type)
@@ -212,16 +236,12 @@ def check_errors_transformation(df: pd.DataFrame, error_col: str = "errors"):
     print(f"  - Transactions avec >= 1 erreur (has_error)      : {int(df['has_error'].sum()):>8}")
     print(f"  - Transactions avec échec auth (has_auth_error)  : {int(df['has_auth_error'].sum()):>8}")
     print(f"Critère de fin P3-06 validé : {all_match}\n")
- 
-    print(f"  - Transactions avec >= 1 erreur (has_error)      : {int(df['has_error'].sum()):>8}")
-    print(f"  - Transactions avec échec auth (has_auth_error)  : {int(df['has_auth_error'].sum()):>8}")
-    print(f"Critère de fin P3-06 validé : {all_match}\n")
- 
- 
+
+
 # =============================================================================
 # P3-07 : Structuration du lieu des transactions
 # =============================================================================
- 
+
 # Codes officiels à 2 lettres des 50 États américains + DC + territoires US
 US_STATES_AND_TERRITORIES = {
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -231,9 +251,9 @@ US_STATES_AND_TERRITORIES = {
     "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
     "DC", "PR", "GU", "VI", "AS", "MP", "AA"
 }
- 
- 
-def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
+
+
+def structure_transaction_location(df: pd.DataFrame) -> pd.DataFrame:
     """
     P3-07 : Structure les colonnes géographiques des transactions :
     - Crée l'indicateur 'is_online' (int8 : 0/1)
@@ -244,39 +264,39 @@ def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
     city_str = df["merchant_city"].astype("string").str.strip().fillna("UNKNOWN")
     state_str = df["merchant_state"].astype("string").str.strip()
     chip_str = df["use_chip"].astype("string").str.strip().fillna("")
- 
+
     # 1. Indicateur "en ligne" (concordance entre merchant_city == ONLINE et use_chip)
     is_online_mask = (city_str.str.upper() == "ONLINE") | (chip_str == "Online Transaction")
     df["is_online"] = is_online_mask.astype("int8")
 
         # Désaccord ville ONLINE / canal (P2-07) : conservé et marqué, pas supprimé
     df["online_channel_mismatch"] = (is_online_mask & (chip_str != "Online Transaction")).astype("int8")
- 
+
     # 2. Identification des États américains vs Pays étrangers
     is_us_state_mask = (~is_online_mask) & state_str.isin(US_STATES_AND_TERRITORIES)
     is_foreign_mask = (~is_online_mask) & state_str.notna() & (~state_str.isin(US_STATES_AND_TERRITORIES))
- 
+
     # 3. Construction de la colonne 'merchant_country'
     country = pd.Series("UNKNOWN", index=df.index, dtype="string")
     country = country.mask(is_online_mask, "ONLINE")
     country = country.mask(is_us_state_mask, "USA")
     country = country.mask(is_foreign_mask, state_str)
     df["merchant_country"] = country.astype("category")
- 
+
     # 4. Construction de la colonne 'merchant_state_clean' (sans aucun NaN)
     state_clean = pd.Series("UNKNOWN", index=df.index, dtype="string")
     state_clean = state_clean.mask(is_online_mask, "ONLINE")
     state_clean = state_clean.mask(is_us_state_mask, state_str)
     state_clean = state_clean.mask(is_foreign_mask, "FOREIGN_NO_STATE")
     df["merchant_state_clean"] = state_clean.astype("category")
- 
+
     # 5. Nettoyage explicite de 'merchant_city'
     city_clean = city_str.mask(is_online_mask, "ONLINE")
     df["merchant_city"] = city_clean.astype("category")
- 
+
     # 6. Indicateur "à l'étranger" (transactions physiques hors USA)
     df["is_foreign"] = is_foreign_mask.astype("int8")
- 
+
     # 7. Traitement explicite du code postal (zip) s'il est présent
     if "zip" in df.columns:
         zip_str = (
@@ -290,11 +310,11 @@ def structurer_lieu_transactions(df: pd.DataFrame) -> pd.DataFrame:
         zip_clean = zip_clean.mask(is_online_mask, "ONLINE")
         zip_clean = zip_clean.mask(is_foreign_mask & df["zip"].isna(), "FOREIGN_NO_ZIP")
         df["zip_clean"] = zip_clean.astype("category")
- 
+
     return df
- 
- 
-def check_location_structuration(df: pd.DataFrame):
+
+
+def check_transaction_location(df: pd.DataFrame):
     """
     Vérifie le critère de fin de P3-07 :
     Plus aucun manquant inexpliqué dans les colonnes de lieu.
@@ -314,7 +334,6 @@ def check_location_structuration(df: pd.DataFrame):
     print(f"  - À l'étranger (is_foreign=1) : {int(df['is_foreign'].sum()):>10}")
     print(f"  - Aux USA (physique)          : {int((df['merchant_country'] == 'USA').sum()):>10}\n")
     print(f"  - Désaccord ville/canal (online_channel_mismatch=1) : {int(df['online_channel_mismatch'].sum()):>10}")
- 
 
 
 # =============================================================================
@@ -324,7 +343,8 @@ def check_location_structuration(df: pd.DataFrame):
 # supprimée et aucune valeur n'est modifiée. Chaque cas est signalé par un
 # indicateur 0/1, que les analyses pourront utiliser comme filtre.
 
-REPEAT_KEYS = ["card_id", "date", "amount", "merchant_id"]
+# REPEAT_KEYS (même carte, même minute, même montant, même commerçant)
+# est défini dans src/diagnostic.py (P2-14) et importé en haut du fichier.
 
 
 def flag_suspicious_transactions(df: pd.DataFrame) -> pd.DataFrame:

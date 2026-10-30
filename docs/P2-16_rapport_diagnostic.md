@@ -2,7 +2,7 @@
 
 Statut : à valider par l'équipe (critère de fin de P2-16). Ce rapport deviendra la section « Données » du rapport final.
 
-Tous les chiffres viennent des sorties de `notebooks/02_diagnostic.ipynb`, sauf la ligne P3-01, qui vient de `docs/01_chargement_donnees.md`.
+Tous les chiffres viennent des sorties de `notebooks/02_diagnostic_qualite.ipynb`, sauf la ligne P3-01, qui vient de `docs/P3-01_chargement_donnees.md`.
 
 ## Les données contrôlées
 

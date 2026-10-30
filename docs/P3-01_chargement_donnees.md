@@ -1,4 +1,4 @@
-# P3-01 — Fonction de chargement commune des données
+# P3-01 : Fonction de chargement commune des données
 
 ## Pourquoi une fonction commune ?
 
@@ -12,9 +12,9 @@ L'objectif de cette tâche est donc d'avoir **un seul code de chargement, partag
 
 ## Ce que fait la fonction
 
-Le fichier `src/load_data.py` contient 4 fonctions : `load_transactions()`, `load_cards()`, `load_users()` et `load_mcc_codes()`, ainsi qu'une fonction interne `load_csv_chunked()`.
+Le fichier `src/load_data.py` contient 4 fonctions pour les fichiers bruts : `load_transactions()`, `load_cards()`, `load_users()` et `load_mcc_codes()`, ainsi qu'une fonction interne `load_csv_chunked()`. Deux fonctions ont été ajoutées ensuite : `load_fraud_labels()` (P2-17) et `load_clean_table()` (P3-10).
 
-Chacune fait deux choses :
+Les fonctions des fichiers CSV font deux choses :
 
 1. **Lit le fichier par morceaux (chunks)** plutôt que d'un coup, pour limiter la charge mémoire pendant la lecture elle-même (surtout utile pour le fichier des transactions).
 2. **Impose des types de données légers** dès la lecture, par exemple :

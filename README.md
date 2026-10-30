@@ -25,9 +25,9 @@ Cinq sources, fournies par le cours. **Elles ne sont pas versionnées dans ce d�
 |---|---|
 | `users_data.csv` | Clients (2 000) : âge, revenus, dette, score de crédit |
 | `cards_data.csv` | Cartes (6 146) : marque, type, limite de crédit |
-| `transactions_data.csv` | Transactions (environ 13 millions), table de faits |
-| `mcc_codes.json` | Correspondance entre code MCC et catégorie de commerçant |
-| `fraud_labels.json` | Étiquette de fraude (Yes/No) pour 67 % des transactions |
+| `transactions_data.csv` | Transactions (13 305 915, de janvier 2010 à octobre 2019), table de faits |
+| `mcc_codes.json` | Catégories de commerçants (109 codes MCC) |
+| `fraud_labels.json` | Étiquette de fraude (Yes/No) pour 8 914 963 transactions, soit 67,0 % |
 
 Les tables `users_data` et `cards_data` sont des tables de dimension, reliées à `transactions_data` par `client_id` et `card_id`.
 
@@ -39,11 +39,14 @@ projet5-fraude-bancaire/
 ├── .gitignore
 ├── src/
 │   ├── __init__.py
-│   ├── load_data.py       # fonctions de chargement communes
-│   ├── diagnostic.py      # fonctions de contrôle du diagnostic (phase 2)
-│   └── clean_data.py      # fonctions de nettoyage et de transformation
-├── notebooks/             # notebooks d'exploration et d'analyse
-├── docs/                  # documentation technique de l'équipe
+│   ├── load_data.py       # chargement des fichiers bruts et des tables nettoyées
+│   ├── diagnostic.py      # contrôles du diagnostic (phase 2)
+│   ├── clean_data.py      # nettoyage et transformation (phase 3)
+│   └── mcc_families.py    # familles de codes MCC (P3-05)
+├── notebooks/
+│   ├── 02_diagnostic_qualite.ipynb        # phase 2 : diagnostic de la qualité
+│   └── 03_nettoyage_transformation.ipynb  # phase 3 : nettoyage et transformation
+├── docs/                  # une page par ticket, nommée par son numéro (P3-02_...)
 └── data/                  # fichiers de données (ignoré par Git)
     └── clean/             # tables nettoyées au format Parquet (P3-10)
 ```
@@ -62,7 +65,7 @@ projet5-fraude-bancaire/
 3. Installer les bibliothèques nécessaires :
 
    ```bash
-   pip install pandas pyarrow jupyter matplotlib
+   pip install -r requirements.txt
    ```
 
 4. Ouvrir le dossier du dépôt dans VS Code. Le fichier `.vscode/settings.json` fait exécuter les notebooks depuis la racine du projet, ce qui permet d'écrire :
@@ -71,7 +74,7 @@ projet5-fraude-bancaire/
    from src.load_data import load_transactions, load_cards, load_users, load_mcc_codes, load_fraud_labels
    ```
 
-5. Pour travailler sur les données nettoyées, exécuter une fois `notebooks/03_nettoyage.ipynb`. Il crée les fichiers de `data/clean/`, qui se relisent ensuite en quelques secondes :
+5. Pour travailler sur les données nettoyées, exécuter une fois `notebooks/03_nettoyage_transformation.ipynb` (environ 4 minutes). Il crée les fichiers de `data/clean/`, qui se relisent ensuite en quelques secondes :
 
    ```python
    from src.load_data import load_clean_table
@@ -97,6 +100,8 @@ Ensuite, ouvrir une **Pull Request** vers `main`. Le relecteur désigné dans Ji
 Règles à respecter :
 
 - Mettre le numéro du ticket dans le nom de la branche et dans le message de commit.
+- Un notebook par phase, nommé `<numéro de phase>_<contenu>.ipynb` (exemple : `02_diagnostic_qualite.ipynb`). Une section par ticket, avec son critère de fin et des constats sous chaque résultat.
+- Une page de documentation par ticket dans `docs/`, nommée `<ticket>_<contenu>.md` (exemple : `P3-02_conversion_montants.md`).
 - Les fichiers de `src/` contiennent des fonctions réutilisables. Les notebooks contiennent l'exécution et l'analyse.
 - Ne jamais commiter de fichier de données (`.csv`, `.json`, `.parquet`).
 - Avant de commiter un notebook, faire **Clear All Outputs**, car certaines sorties affichent des données sensibles (numéros de carte).
@@ -107,20 +112,20 @@ Règles à respecter :
 
 | Document | Contenu |
 |---|---|
-`docs/01_chargement_donnees.md` | Fonctions de chargement communes (P3-01) |
-| `docs/02_conversion_montants.md` | Conversion des montants en nombres (P3-02) |
-| `docs/03_conversion_dates.md` | Conversion des dates (P3-03) |
-| `docs/04_table_mcc.md` | Table des catégories MCC (P3-04) |
-| `docs/05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
-| `docs/06_colonne_errors.md` | Transformation de la colonne errors (P3-06) |
-| `docs/07_lieu_transactions.md` | Structuration du lieu des transactions (P3-07) |
 | `docs/P2-16_rapport_diagnostic.md` | Rapport de diagnostic de la qualité des données (P2-16) |
 | `docs/P2-17_etiquettes_fraude.md` | Contrôle des étiquettes de fraude (P2-17) |
-| `docs/08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
-| `docs/09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
-| `docs/10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
-| `docs/11_controles_rejoues.md` | Contrôles rejoués sur les tables nettoyées (P3-11) |
-| `docs/12_journal_transformations.md` | Journal des transformations (P3-12) |
+| `docs/P3-01_chargement_donnees.md` | Fonctions de chargement communes (P3-01) |
+| `docs/P3-02_conversion_montants.md` | Conversion des montants en nombres (P3-02) |
+| `docs/P3-03_conversion_dates.md` | Conversion des dates (P3-03) |
+| `docs/P3-04_table_mcc.md` | Table des catégories MCC (P3-04) |
+| `docs/P3-05_familles_mcc.md` | Regroupement des codes MCC en familles (P3-05) |
+| `docs/P3-06_colonne_errors.md` | Transformation de la colonne errors (P3-06) |
+| `docs/P3-07_lieu_transactions.md` | Structuration du lieu des transactions (P3-07) |
+| `docs/P3-08_valeurs_suspectes.md` | Règles pour les valeurs suspectes (P3-08) |
+| `docs/P3-09_colonnes_retirees.md` | Colonnes sensibles et inutiles retirées (P3-09) |
+| `docs/P3-10_tables_nettoyees.md` | Tables nettoyées enregistrées en Parquet (P3-10) |
+| `docs/P3-11_controles_rejoues.md` | Contrôles rejoués sur les tables nettoyées (P3-11) |
+| `docs/P3-12_journal_transformations.md` | Journal des transformations (P3-12) |
 
 ## Livrables
 
@@ -130,3 +135,11 @@ Règles à respecter :
 | Diagnostic, nettoyage et transformation des données | 9 novembre |
 | Analyse exploratoire, rapport et présentation | 7 décembre |
 | Rapport final avec recommandations opérationnelles | 14 décembre |
+
+### Livrable du 9 novembre : diagnostic, nettoyage et transformation
+
+| Partie | Notebook | Documents |
+|---|---|---|
+| Diagnostic de la qualité (phase 2) | `notebooks/02_diagnostic_qualite.ipynb` | `docs/P2-16_rapport_diagnostic.md`, `docs/P2-17_etiquettes_fraude.md` |
+| Nettoyage et transformation (phase 3) | `notebooks/03_nettoyage_transformation.ipynb` | `docs/P3-01_...` à `docs/P3-11_...` |
+| Synthèse des transformations | | `docs/P3-12_journal_transformations.md` |

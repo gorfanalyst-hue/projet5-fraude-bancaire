@@ -17,7 +17,7 @@ Le critère de fin du ticket est : **couverture, taux de fraude et cohérence av
 
 - `src/load_data.py` : la fonction de chargement `load_fraud_labels`, et un nouveau paramètre `usecols` dans `load_transactions`.
 - `src/diagnostic.py` : un nouveau fichier pour les fonctions de contrôle de la phase 2. Elles mesurent sans rien modifier.
-- `notebooks/02_diagnostic.ipynb` : le notebook de la phase 2, avec une section par ticket.
+- `notebooks/02_diagnostic_qualite.ipynb` : le notebook de la phase 2, avec une section par ticket.
 
 ## Fonction 1 : `load_fraud_labels`
 

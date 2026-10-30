@@ -1,4 +1,4 @@
-# P3-02 — Conversion des montants en nombres
+# P3-02 : Conversion des montants en nombres
 
 ## Pourquoi cette étape ?
 
