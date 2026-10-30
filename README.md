@@ -44,6 +44,7 @@ projet5-fraude-bancaire/
 │   ├── clean_data.py      # nettoyage et transformation (phase 3)
 │   └── mcc_families.py    # familles de codes MCC (P3-05)
 ├── notebooks/
+│   ├── 01_exploration_donnees.ipynb       # phase 2 : exploration des fichiers reçus
 │   ├── 02_diagnostic_qualite.ipynb        # phase 2 : diagnostic de la qualité
 │   └── 03_nettoyage_transformation.ipynb  # phase 3 : nettoyage et transformation
 ├── docs/                  # une page par ticket, nommée par son numéro (P3-02_...)
@@ -140,6 +141,7 @@ Règles à respecter :
 
 | Partie | Notebook | Documents |
 |---|---|---|
+| Exploration des fichiers (P2-01) | `notebooks/01_exploration_donnees.ipynb` | |
 | Diagnostic de la qualité (phase 2) | `notebooks/02_diagnostic_qualite.ipynb` | `docs/P2-16_rapport_diagnostic.md`, `docs/P2-17_etiquettes_fraude.md` |
 | Nettoyage et transformation (phase 3) | `notebooks/03_nettoyage_transformation.ipynb` | `docs/P3-01_...` à `docs/P3-11_...` |
 | Synthèse des transformations | | `docs/P3-12_journal_transformations.md` |

@@ -490,3 +490,53 @@ def check_clean_tables(tables: dict, expected_rows: dict, error_reference: pd.Se
     add("étiquettes sans transaction (P2-17)", n_absent, n_absent == 0)
 
     return pd.DataFrame(rows)
+
+
+# =============================================================================
+# P2-01 : Exploration des fichiers reçus
+# =============================================================================
+
+def describe_files(tables: dict, files: dict, folder) -> pd.DataFrame:
+    """
+    Taille sur disque, nombre de lignes et de colonnes de chaque fichier reçu.
+    tables : {nom : DataFrame} ; files : {nom : nom du fichier} ; folder : dossier data/.
+    """
+    rows = []
+    for name, df in tables.items():
+        path = folder / files[name]
+        rows.append({"table": name, "fichier": files[name],
+                     "taille (Mo)": round(path.stat().st_size / 1e6, 1),
+                     "lignes": len(df), "colonnes": df.shape[1]})
+    return pd.DataFrame(rows).set_index("table")
+
+
+def describe_columns(df: pd.DataFrame, sensitive=()) -> pd.DataFrame:
+    """
+    Une ligne par colonne : type au chargement, nombre de valeurs distinctes
+    et un exemple (première valeur non manquante). Les colonnes sensibles
+    sont masquées.
+    """
+    rows = []
+    for col in df.columns:
+        values = df[col].dropna()
+        if col in sensitive:
+            example = "(masqué)"
+        elif len(values):
+            example = str(values.iloc[0])
+        else:
+            example = "(aucune valeur)"
+        rows.append({"colonne": col, "type au chargement": str(df[col].dtype),
+                     "valeurs distinctes": int(df[col].nunique()), "exemple": example})
+    return pd.DataFrame(rows).set_index("colonne")
+
+
+def find_key_columns(tables: dict) -> pd.DataFrame:
+    """
+    Colonnes d'identifiants de chaque table : nom égal à "id", finissant par
+    "_id", ou contenant "mcc".
+    """
+    rows = []
+    for name, df in tables.items():
+        keys = [c for c in df.columns if c == "id" or c.endswith("_id") or "mcc" in c]
+        rows.append({"table": name, "colonnes d'identifiant": ", ".join(keys)})
+    return pd.DataFrame(rows).set_index("table")
