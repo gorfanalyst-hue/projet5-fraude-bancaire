@@ -51,3 +51,21 @@ Aucune ligne n'a été supprimée.
 - Les valeurs suspectes (montants négatifs ou nuls, revenus trop bas, limites nulles, doubles débits possibles) sont signalées par des indicateurs, sans être modifiées.
 - Les colonnes sensibles (numéro de carte, CVV, adresse) sont retirées.
 - Les tables nettoyées sont enregistrées au format Parquet. Les 18 contrôles de cohérence rejoués sur ces fichiers réussissent tous.
+
+## Phase 4 : table d'analyse (P4-01 à P4-10)
+
+Tous les chiffres viennent des sorties de `notebooks/04_table_analyse.ipynb`. Le détail de chaque étape est dans les pages `docs/P4-01` à `docs/P4-10`.
+
+| Étape | Ticket | Colonnes | Résultat |
+| --- | --- | --- | --- |
+| Jointure des tables | P4-01 | ajout de 7 colonnes des clients, 7 colonnes des cartes, `mcc_family`, `is_fraud` ; retrait de `merchant_state` et `zip` (remplacées en P3-07) | 13 305 915 lignes avant et après, 0 identifiant en double |
+| Variables de temps | P4-02 | ajout de `year`, `month`, `weekday`, `hour`, `is_night`, `is_weekend` | 10 transactions sur 10 identiques au recalcul |
+| Âge à la transaction | P4-03 | ajout de `age_at_transaction` | De 17 à 101 ans ; 10 âges vérifiés à la main |
+| Montant habituel | P4-04 | ajout de `client_median_amount`, `amount_gap`, `amount_ratio` | 12 787 valeurs vides (moins de 10 achats précédents) |
+| Fréquence de la carte | P4-05 | ajout de `card_tx_1h`, `card_tx_24h` | Vérifiées sur la carte 2048 |
+| Échecs récents | P4-06 | ajout de `card_auth_errors_24h` | Vérifiée sur la carte 11 |
+| Premières fois | P4-07 | ajout de `is_first_merchant`, `is_first_mcc`, `is_first_country`, `client_tx_rank` | Vérifiés sur le client 363 |
+| Contexte | P4-08 | ajout de `is_round_amount`, `outside_card_validity` | 392 transactions hors validité, comme en P2-11 |
+| Contrôle et enregistrement | P4-10 | toutes | `data/clean/analysis.parquet` : 13 305 915 lignes, 63 colonnes, 530,1 Mo ; relecture en 11,7 s |
+
+Aucune ligne n'est supprimée et aucune valeur existante n'est modifiée : la phase 4 ajoute seulement des colonnes.
