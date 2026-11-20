@@ -131,7 +131,7 @@ def resume_familles(tables: dict, annees, lieux, seuil: str) -> pd.DataFrame:
 
 def liste_signalee(tables: dict, annees, seuil: str, client=None, familles=None, canaux=None, raisons=None,
                    score_min=None) -> pd.DataFrame:
-    """P8-07 : transactions signalées au seuil choisi, triées par score, avec les filtres demandés."""
+    """P8-07 : transactions signalées au seuil choisi, triées par rang (score décroissant), avec les filtres demandés."""
     t = tables["signalees"]
     t = t[t["year"].between(annees[0], annees[1])]
     col = SEUILS_LISTE[seuil]
@@ -147,7 +147,8 @@ def liste_signalee(tables: dict, annees, seuil: str, client=None, familles=None,
         t = t[t["raison_principale"].isin(raisons)]
     if score_min is not None:
         t = t[t["score"] >= score_min]
-    return t.sort_values("score", ascending=False)
+    # Le rang suit déjà le score ; il départage aussi les scores égaux (beaucoup de transactions à 100)
+    return t.sort_values("rang")
 
 
 def fr(x, decimales: int = 0) -> str:
