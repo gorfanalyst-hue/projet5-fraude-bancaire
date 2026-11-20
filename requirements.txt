@@ -2,3 +2,6 @@ pandas
 pyarrow
 jupyter
 matplotlib
+scikit-learn
+scipy
+streamlit>=1.50
