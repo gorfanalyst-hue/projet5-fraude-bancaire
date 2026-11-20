@@ -34,7 +34,7 @@ Le critère de fin du ticket est : **tables exportées, de taille raisonnable**.
 
 Chaque table résumée contient les transactions, les achats, les erreurs, les achats en ligne et à l'étranger, et les signalements aux trois seuils. Le tableau de bord peut ainsi filtrer par années, canaux et seuil sans relire les transactions.
 
-**Résultat :** 10 tables, 8,8 Mo au total, préparées en 23 s. **Critère de fin validé.**
+**Résultat :** 10 tables, 8,8 Mo au total, préparées en 26 s. **Critère de fin validé.**
 
 ## Ce que cette étape ne fait PAS
 
